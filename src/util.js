@@ -12,6 +12,7 @@ module.exports.reduceRight = require("lodash/fp/reduceRight");
 
 // Array
 module.exports.head = require("lodash/fp/head");
+module.exports.last = require("lodash/fp/last");
 module.exports.updateAt = curry(updateAt);
 
 // Object
@@ -33,3 +34,4 @@ module.exports.stubFalse = require("lodash/fp/stubFalse");
 // Lang
 module.exports.isFunction = require("lodash/fp/isFunction");
 module.exports.isString = require("lodash/fp/isString");
+module.exports.isEmpty = require("lodash/fp/isEmpty");
