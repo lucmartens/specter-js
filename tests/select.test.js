@@ -4,6 +4,9 @@ const s = require("../src/core");
 const select = (path, struct, expected) =>
   expect(s.select(path, struct)).toEqual(expected);
 
+const selectOne = (path, struct, expected) =>
+  expect(s.selectOne(path, struct)).toEqual(expected);
+
 describe("select", () => {
   test("Without navigators", () => {
     select([], 1, [1]);
@@ -83,5 +86,16 @@ describe("select", () => {
     select([s.ALL, s.FIRST], [[1, 2], [1, 2]], [1, 1]);
     select([s.ALL, "a"], [{ a: 1 }, { a: 1 }], [1, 1]);
     select([s.ALL, "a", v => v > 1], [{ a: 1 }, { a: 2 }], [2]);
+  });
+});
+
+describe("select-one", () => {
+  test("without navigators", () => {
+    selectOne([], 1, 1);
+    selectOne([], [], []);
+  });
+
+  test("with navigator", () => {
+    selectOne([s.FIRST], [1, 2, 3], 1);
   });
 });

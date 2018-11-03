@@ -95,20 +95,26 @@ module.exports.submap = keys => ({
   transform: next => struct => _.merge(struct, next(_.pick(keys, struct)))
 });
 
-const compile = _.cond([
+const compileNavigator = _.cond([
   [_.isString, module.exports.key],
   [_.isFunction, module.exports.pred],
   [_.stubTrue, _.identity]
 ]);
 
-module.exports.select = (path, struct) =>
-  _.reduceRight((nav, next) => compile(nav).select(next), v => [v], path)(
-    struct
+const compilePath = (path, operator, initial) =>
+  _.reduceRight(
+    (navigator, next) => compileNavigator(navigator)[operator](next),
+    initial,
+    path
   );
 
+module.exports.select = (path, struct) =>
+  compilePath(path, "select", v => [v])(struct);
+
+module.exports.selectOne = (path, struct) =>
+  compilePath(path, "select", _.identity)(struct);
+
 module.exports.transform = (path, update, struct) =>
-  _.reduceRight((nav, next) => compile(nav).transform(next), update, path)(
-    struct
-  );
+  compilePath(path, "transform", update)(struct);
 
 module.exports = module.exports;
