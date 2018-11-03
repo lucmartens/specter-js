@@ -20,6 +20,8 @@ module.exports.set = set;
 module.exports.get = get;
 module.exports.merge = require("lodash/fp/merge");
 module.exports.update = require("lodash/fp/update");
+module.exports.values = require("lodash/fp/values");
+module.exports.mapValues = require("lodash/fp/mapValues");
 
 // Function
 module.exports.curry = curry;
@@ -33,5 +35,6 @@ module.exports.stubFalse = require("lodash/fp/stubFalse");
 
 // Lang
 module.exports.isFunction = require("lodash/fp/isFunction");
+module.exports.isPlainObject = require("lodash/fp/isPlainObject");
 module.exports.isString = require("lodash/fp/isString");
 module.exports.isEmpty = require("lodash/fp/isEmpty");
