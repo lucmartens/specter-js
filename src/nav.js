@@ -6,8 +6,15 @@ module.exports.ALL = {
 };
 
 module.exports.FIRST = {
-  select: next => struct => next(_.head(struct)),
-  transform: next => _.updateAt(0, next)
+  select: next => struct => (_.isEmpty(struct) ? [] : next(_.head(struct))),
+  transform: next => struct =>
+    _.isEmpty(struct) ? struct : _.updateAt(0, next, struct)
+};
+
+module.exports.LAST = {
+  select: next => struct => (_.isEmpty(struct) ? [] : next(_.last(struct))),
+  transform: next => struct =>
+    _.isEmpty(struct) ? struct : _.updateAt(struct.length - 1, next, struct)
 };
 
 module.exports.key = key => ({
@@ -18,8 +25,4 @@ module.exports.key = key => ({
 module.exports.pred = pred => ({
   select: next => struct => (pred(struct) ? next(struct) : []),
   transform: next => struct => (pred(struct) ? next(struct) : struct)
-});
-
-module.exports.filter = pred => ({
-  select: next => struct => next(_.filter(pred, struct))
 });

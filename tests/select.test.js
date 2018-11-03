@@ -19,11 +19,19 @@ describe("select", () => {
   });
 
   test("FIRST", () => {
-    select([s.FIRST], undefined, [undefined]);
-    select([s.FIRST], [], [undefined]);
+    select([s.FIRST], undefined, []);
+    select([s.FIRST], [], []);
     select([s.FIRST], [1, 2], [1]);
     select([s.FIRST], [[1, 2]], [[1, 2]]);
     select([s.FIRST, s.FIRST], [[1, 2]], [1]);
+  });
+
+  test("LAST", () => {
+    select([s.LAST], undefined, []);
+    select([s.LAST], [], []);
+    select([s.LAST], [1, 2], [2]);
+    select([s.LAST], [[1, 2]], [[1, 2]]);
+    select([s.LAST, s.LAST], [[1, 2]], [2]);
   });
 
   test("key", () => {
@@ -38,12 +46,6 @@ describe("select", () => {
     select([_.stubTrue], 1, [1]);
     select([v => v === 1], 1, [1]);
     select([v => v !== 1], 1, []);
-  });
-
-  test("filter", () => {
-    select([s.filter(_.stubTrue)], undefined, [[]]);
-    select([s.filter(_.stubTrue)], [], [[]]);
-    select([s.filter(v => v > 1)], [1, 2, 3], [[2, 3]]);
   });
 
   test("complex", () => {
