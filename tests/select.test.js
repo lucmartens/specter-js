@@ -40,6 +40,11 @@ describe("select", () => {
     select([s.LAST, s.LAST], [[1, 2]], [2]);
   });
 
+  test("END", () => {
+    select([s.END], undefined, []);
+    select([s.END], [], []);
+  });
+
   test("key", () => {
     select(["a"], undefined, [undefined]);
     select(["a"], [], [undefined]);

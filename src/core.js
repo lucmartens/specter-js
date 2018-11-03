@@ -41,6 +41,16 @@ module.exports.LAST = {
   }
 };
 
+module.exports.BEGINNING = {
+  select: next => struct => [],
+  transform: next => struct => _.concat(next([]), struct)
+};
+
+module.exports.END = {
+  select: next => struct => [],
+  transform: next => struct => _.concat(struct, next([]))
+};
+
 module.exports.key = key => ({
   select: next => struct => next(_.get(key, struct)),
   transform: next => struct => {
