@@ -42,6 +42,16 @@ describe("transform", () => {
     transform([s.LAST], _.constant(s.NONE), [[1], 2], [[1]]);
   });
 
+  test("BEGINNING", () => {
+    transform([s.BEGINNING], _.constant([3, 4]), [1, 2], [3, 4, 1, 2]);
+    transform([s.BEGINNING], _.constant(3), [1, 2], [3, 1, 2]);
+  });
+
+  test("END", () => {
+    transform([s.END], _.constant([3, 4]), [1, 2], [1, 2, 3, 4]);
+    transform([s.END], _.constant(3), [1, 2], [1, 2, 3]);
+  });
+
   test("key", () => {
     transform(["a"], _.identity, 1, 1); // clojure would throw an exception
     transform(["a"], _.identity, [], []);
