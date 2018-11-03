@@ -1,0 +1,15 @@
+{
+  "name": "specter-js",
+  "version": "0.0.1",
+  "main": "src/core.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "yarn jest"
+  },
+  "dependencies": {
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "jest": "^23.6.0"
+  }
+}
