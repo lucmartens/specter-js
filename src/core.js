@@ -87,7 +87,7 @@ module.exports.pred = pred => ({
 
 module.exports.parser = (parse, unparse) => ({
   select: next => struct => next(parse(struct)),
-  transform: next => struct => next(parse(struct))
+  transform: next => struct => unparse(next(parse(struct)))
 });
 
 const compile = _.cond([

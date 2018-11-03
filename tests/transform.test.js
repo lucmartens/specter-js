@@ -78,8 +78,10 @@ describe("transform", () => {
   test("parser", () => {
     const parse = time => time.split(".");
     const unparse = splitTime => splitTime.join(".");
-    transform([s.parser(parse, unparse)], _.head, "10.35", "10");
-    transform([s.ALL, s.parser(parse, unparse)], _.head, ["10.35"], ["10"]);
+    const parser = s.parser(parse, unparse);
+    transform([parser], _.identity, "10.35", "10.35");
+    transform([parser], v => [v[0]], "10.35", "10");
+    transform([parser, s.FIRST], _.constant(s.NONE), "10.35", "35");
   });
 
   test("complex", () => {
