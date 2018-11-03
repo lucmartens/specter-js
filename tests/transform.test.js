@@ -1,4 +1,4 @@
-const _ = require("../src/util");
+const _ = require("lodash/fp");
 const s = require("../src/core");
 
 const transform = (path, fn, struct, expected) =>
@@ -17,6 +17,7 @@ describe("transform", () => {
     transform([s.ALL], _.identity, [1], [1]);
     transform([s.ALL], inc, [1, 2], [2, 3]);
     transform([s.ALL, s.ALL], inc, [[1, 2], [3, 4]], [[2, 3], [4, 5]]);
+    transform([s.ALL], _.constant(s.NONE), [1, 2, 3], []);
   });
 
   test("MAP_VALS", () => {
@@ -30,6 +31,7 @@ describe("transform", () => {
     transform([s.FIRST], _.identity, [], []);
     transform([s.FIRST], inc, [1, 2], [2, 2]);
     transform([s.FIRST, s.FIRST], inc, [[1], 2], [[2], 2]);
+    transform([s.FIRST], _.constant(s.NONE), [[1], 2], [2]);
   });
 
   test("LAST", () => {
@@ -37,6 +39,7 @@ describe("transform", () => {
     transform([s.LAST], _.identity, [], []);
     transform([s.LAST], inc, [1, 2], [1, 3]);
     transform([s.LAST, s.LAST], inc, [1, [2]], [1, [3]]);
+    transform([s.LAST], _.constant(s.NONE), [[1], 2], [[1]]);
   });
 
   test("key", () => {
@@ -44,6 +47,7 @@ describe("transform", () => {
     transform(["a"], _.identity, [], []);
     transform(["a"], inc, { a: 1, b: 2 }, { a: 2, b: 2 });
     transform(["a", "b"], inc, { a: { b: 1, a: 1 } }, { a: { b: 2, a: 1 } });
+    transform(["a"], _.constant(s.NONE), { a: 1, b: 2 }, { b: 2 });
   });
 
   test("pred", () => {
@@ -53,5 +57,6 @@ describe("transform", () => {
 
   test("complex", () => {
     transform([s.ALL, even], inc, [1, 2, 3], [1, 3, 3]);
+    transform([s.ALL, even], _.constant(s.NONE), [1, 2, 3], [1, 3]);
   });
 });

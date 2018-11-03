@@ -1,4 +1,4 @@
-const _ = require("../src/util");
+const _ = require("lodash/fp");
 const s = require("../src/core");
 
 const select = (path, struct, expected) =>
