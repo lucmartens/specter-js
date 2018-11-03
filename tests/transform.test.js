@@ -52,6 +52,16 @@ describe("transform", () => {
     transform([s.END], _.constant(3), [1, 2], [1, 2, 3]);
   });
 
+  test("BEFORE_ELEMENT", () => {
+    transform([s.BEFORE_ELEMENT], _.constant([3, 4]), [1, 2], [[3, 4], 1, 2]);
+    transform([s.BEFORE_ELEMENT], _.constant(3), [1, 2], [3, 1, 2]);
+  });
+
+  test("AFTER_ELEMENT", () => {
+    transform([s.AFTER_ELEMENT], _.constant([3, 4]), [1, 2], [1, 2, [3, 4]]);
+    transform([s.AFTER_ELEMENT], _.constant(3), [1, 2], [1, 2, 3]);
+  });
+
   test("key", () => {
     transform(["a"], _.identity, 1, 1); // clojure would throw an exception
     transform(["a"], _.identity, [], []);
