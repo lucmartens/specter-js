@@ -2,7 +2,7 @@ const _ = require("lodash/fp");
 
 _.mixin({
   cons: (a, b) => _.concat([a], b),
-  conj: (a, b) => _.concat(b, [a])
+  conj: (b, a) => _.concat(b, [a])
 });
 
 const NONE = Symbol("NONE");
@@ -13,7 +13,7 @@ module.exports.ALL = {
   transform: next =>
     _.reduce((acc, v) => {
       const result = next(v);
-      return result === NONE ? acc : _.concat(acc, [result]);
+      return result === NONE ? acc : _.conj(acc, result);
     }, [])
 };
 
@@ -68,7 +68,7 @@ module.exports.AFTER_ELEMENT = {
   select: next => struct => NONE,
   transform: next => struct => {
     const result = next(NONE);
-    return result === NONE ? struct : _.conj(result, struct);
+    return result === NONE ? struct : _.conj(struct, result);
   }
 };
 
@@ -97,6 +97,7 @@ module.exports.submap = keys => ({
 
 const compileNavigator = _.cond([
   [_.isString, module.exports.key],
+  [_.isNumber, module.exports.key],
   [_.isFunction, module.exports.pred],
   [_.stubTrue, _.identity]
 ]);
