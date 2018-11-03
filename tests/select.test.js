@@ -1,44 +1,55 @@
 const _ = require("../src/util");
 const s = require("../src/core");
 
+const select = (path, struct, expected) =>
+  expect(s.select(path, struct)).toEqual(expected);
+
 describe("select", () => {
   test("Without navigators", () => {
-    expect(s.select([], 1)).toEqual([1]);
-    expect(s.select([], [])).toEqual([[]]);
+    select([], 1, [1]);
+    select([], [], [[]]);
   });
 
   test("ALL", () => {
-    expect(s.select([s.ALL], undefined)).toEqual([]);
-    expect(s.select([s.ALL], [])).toEqual([]);
-    expect(s.select([s.ALL], [1, 2])).toEqual([1, 2]);
-    expect(s.select([s.ALL], [[1, 2]])).toEqual([[1, 2]]);
-    expect(s.select([s.ALL, s.ALL], [[1, 2]])).toEqual([1, 2]);
+    select([s.ALL], undefined, []);
+    select([s.ALL], [], []);
+    select([s.ALL], [1, 2], [1, 2]);
+    select([s.ALL], [[1, 2]], [[1, 2]]);
+    select([s.ALL, s.ALL], [[1, 2]], [1, 2]);
   });
 
   test("FIRST", () => {
-    expect(s.select([s.FIRST], undefined)).toEqual([undefined]);
-    expect(s.select([s.FIRST], [])).toEqual([undefined]);
-    expect(s.select([s.FIRST], [1, 2])).toEqual([1]);
-    expect(s.select([s.FIRST], [[1, 2]])).toEqual([[1, 2]]);
-    expect(s.select([s.FIRST, s.FIRST], [[1, 2]])).toEqual([1]);
+    select([s.FIRST], undefined, [undefined]);
+    select([s.FIRST], [], [undefined]);
+    select([s.FIRST], [1, 2], [1]);
+    select([s.FIRST], [[1, 2]], [[1, 2]]);
+    select([s.FIRST, s.FIRST], [[1, 2]], [1]);
   });
 
   test("key", () => {
-    expect(s.select(["a"], undefined)).toEqual([undefined]);
-    expect(s.select(["a"], [])).toEqual([undefined]);
-    expect(s.select(["a"], { a: 1 })).toEqual([1]);
+    select(["a"], undefined, [undefined]);
+    select(["a"], [], [undefined]);
+    select(["a"], { a: 1 }, [1]);
+    select(["a", "b"], { a: { b: 1 } }, [1]);
   });
 
   test("pred", () => {
-    expect(s.select([_.stubFalse], 1)).toEqual([]);
-    expect(s.select([_.stubTrue], 1)).toEqual([1]);
-    expect(s.select([v => v === 1], 1)).toEqual([1]);
-    expect(s.select([v => v !== 1], 1)).toEqual([]);
+    select([_.stubFalse], 1, []);
+    select([_.stubTrue], 1, [1]);
+    select([v => v === 1], 1, [1]);
+    select([v => v !== 1], 1, []);
   });
 
   test("filter", () => {
-    expect(s.select([s.filter(_.stubTrue)], undefined)).toEqual([[]]);
-    expect(s.select([s.filter(_.stubTrue)], [])).toEqual([[]]);
-    expect(s.select([s.filter(v => v > 1)], [1, 2, 3])).toEqual([[2, 3]]);
+    select([s.filter(_.stubTrue)], undefined, [[]]);
+    select([s.filter(_.stubTrue)], [], [[]]);
+    select([s.filter(v => v > 1)], [1, 2, 3], [[2, 3]]);
+  });
+
+  test("complex", () => {
+    select([s.ALL, s.FIRST], undefined, []);
+    select([s.ALL, s.FIRST], [[1, 2], [1, 2]], [1, 1]);
+    select([s.ALL, "a"], [{ a: 1 }, { a: 1 }], [1, 1]);
+    select([s.ALL, "a", v => v > 1], [{ a: 1 }, { a: 2 }], [2]);
   });
 });
