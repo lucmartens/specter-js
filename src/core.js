@@ -85,6 +85,11 @@ module.exports.pred = pred => ({
   transform: next => struct => (pred(struct) ? next(struct) : struct)
 });
 
+module.exports.parser = (parse, unparse) => ({
+  select: next => struct => next(parse(struct)),
+  transform: next => struct => next(parse(struct))
+});
+
 const compile = _.cond([
   [_.isString, module.exports.key],
   [_.isFunction, module.exports.pred],
