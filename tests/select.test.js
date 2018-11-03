@@ -61,6 +61,8 @@ describe("select", () => {
     select(["a"], [], [undefined]);
     select(["a"], { a: 1 }, [1]);
     select(["a", "b"], { a: { b: 1 } }, [1]);
+    select([0], [1], [1]);
+    select([1], [1], [undefined]);
   });
 
   test("pred", () => {
