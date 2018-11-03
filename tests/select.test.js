@@ -18,6 +18,12 @@ describe("select", () => {
     select([s.ALL, s.ALL], [[1, 2]], [1, 2]);
   });
 
+  test("MAP_VALS", () => {
+    select([s.MAP_VALS], undefined, []);
+    select([s.MAP_VALS], {}, []);
+    select([s.MAP_VALS], { a: 1, b: 2 }, [1, 2]);
+  });
+
   test("FIRST", () => {
     select([s.FIRST], undefined, []);
     select([s.FIRST], [], []);

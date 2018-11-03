@@ -19,6 +19,12 @@ describe("transform", () => {
     transform([s.ALL, s.ALL], inc, [[1, 2], [3, 4]], [[2, 3], [4, 5]]);
   });
 
+  test("MAP_VALS", () => {
+    transform([s.MAP_VALS], inc, {}, {});
+    transform([s.MAP_VALS], inc, { a: 1 }, { a: 2 });
+    transform([s.MAP_VALS], inc, [1, 2], [2, 3]);
+  });
+
   test("FIRST", () => {
     transform([s.FIRST], _.identity, 1, 1); // clojure would throw an exception
     transform([s.FIRST], _.identity, [], []);

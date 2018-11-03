@@ -5,6 +5,12 @@ module.exports.ALL = {
   transform: next => _.map(next)
 };
 
+module.exports.MAP_VALS = {
+  select: next => struct => _.flatMap(next, _.values(struct)),
+  transform: next => struct =>
+    _.isPlainObject(struct) ? _.mapValues(next, struct) : _.map(next, struct)
+};
+
 module.exports.FIRST = {
   select: next => struct => (_.isEmpty(struct) ? [] : next(_.head(struct))),
   transform: next => struct =>
