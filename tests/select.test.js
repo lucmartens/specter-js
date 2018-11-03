@@ -73,6 +73,11 @@ describe("select", () => {
     select([s.parser(parse, unparse)], "10.35", [["10", "35"]]);
   });
 
+  test("submap", () => {
+    select([s.submap(["a", "b"])], { a: 1, b: 2, c: 3 }, [{ a: 1, b: 2 }]);
+    select([s.submap([])], { a: 1, b: 2, c: 3 }, [{}]);
+  });
+
   test("complex", () => {
     select([s.ALL, s.FIRST], undefined, []);
     select([s.ALL, s.FIRST], [[1, 2], [1, 2]], [1, 1]);

@@ -90,6 +90,11 @@ module.exports.parser = (parse, unparse) => ({
   transform: next => struct => unparse(next(parse(struct)))
 });
 
+module.exports.submap = keys => ({
+  select: next => struct => next(_.pick(keys, struct)),
+  transform: next => struct => _.merge(struct, next(_.pick(keys, struct)))
+});
+
 const compile = _.cond([
   [_.isString, module.exports.key],
   [_.isFunction, module.exports.pred],

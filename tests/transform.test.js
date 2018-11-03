@@ -84,6 +84,12 @@ describe("transform", () => {
     transform([parser, s.FIRST], _.constant(s.NONE), "10.35", "35");
   });
 
+  test("submap", () => {
+    transform([s.submap([])], _.identity, { a: 1, b: 2 }, { a: 1, b: 2 });
+    transform([s.submap([]), s.MAP_VALS], inc, { a: 1 }, { a: 1 });
+    transform([s.submap(["a"]), s.MAP_VALS], inc, { a: 1 }, { a: 2 });
+  });
+
   test("complex", () => {
     transform([s.ALL, even], inc, [1, 2, 3], [1, 3, 3]);
     transform([s.ALL, even], _.constant(s.NONE), [1, 2, 3], [1, 3]);
