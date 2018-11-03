@@ -75,6 +75,15 @@ describe("transform", () => {
     transform([even], inc, 2, 3);
   });
 
+  test("parser", () => {
+    const parse = time => time.split(".");
+    const unparse = splitTime => splitTime.join(".");
+    const parser = s.parser(parse, unparse);
+    transform([parser], _.identity, "10.35", "10.35");
+    transform([parser], v => [v[0]], "10.35", "10");
+    transform([parser, s.FIRST], _.constant(s.NONE), "10.35", "35");
+  });
+
   test("complex", () => {
     transform([s.ALL, even], inc, [1, 2, 3], [1, 3, 3]);
     transform([s.ALL, even], _.constant(s.NONE), [1, 2, 3], [1, 3]);

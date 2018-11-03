@@ -67,6 +67,12 @@ describe("select", () => {
     select([v => v !== 1], 1, []);
   });
 
+  test("parser", () => {
+    const parse = time => time.split(".");
+    const unparse = splitTime => splitTime.join(".");
+    select([s.parser(parse, unparse)], "10.35", [["10", "35"]]);
+  });
+
   test("complex", () => {
     select([s.ALL, s.FIRST], undefined, []);
     select([s.ALL, s.FIRST], [[1, 2], [1, 2]], [1, 1]);
