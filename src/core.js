@@ -1,5 +1,10 @@
 const _ = require("lodash/fp");
 
+_.mixin({
+  cons: (a, b) => _.concat([a], b),
+  conj: (a, b) => _.concat(b, [a])
+});
+
 const NONE = Symbol("NONE");
 module.exports.NONE = NONE;
 
@@ -49,6 +54,22 @@ module.exports.BEGINNING = {
 module.exports.END = {
   select: next => struct => [],
   transform: next => struct => _.concat(struct, next([]))
+};
+
+module.exports.BEFORE_ELEMENT = {
+  select: next => struct => NONE,
+  transform: next => struct => {
+    const result = next(NONE);
+    return result === NONE ? struct : _.cons(result, struct);
+  }
+};
+
+module.exports.AFTER_ELEMENT = {
+  select: next => struct => NONE,
+  transform: next => struct => {
+    const result = next(NONE);
+    return result === NONE ? struct : _.conj(result, struct);
+  }
 };
 
 module.exports.key = key => ({

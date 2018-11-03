@@ -45,6 +45,14 @@ describe("select", () => {
     select([s.END], [], []);
   });
 
+  test("BEFORE_ELEMENT", () => {
+    select([s.BEFORE_ELEMENT], [], s.NONE);
+  });
+
+  test("AFTER_ELEMENT", () => {
+    select([s.AFTER_ELEMENT], [], s.NONE);
+  });
+
   test("key", () => {
     select(["a"], undefined, [undefined]);
     select(["a"], [], [undefined]);
