@@ -7,8 +7,8 @@ module.exports.ALL = {
   select: next => _.flatMap(next),
   transform: next =>
     _.reduce((acc, v) => {
-      const r = next(v);
-      return r === NONE ? acc : _.concat(acc, [r]);
+      const result = next(v);
+      return result === NONE ? acc : _.concat(acc, [result]);
     }, [])
 };
 
@@ -24,8 +24,8 @@ module.exports.FIRST = {
     if (_.isEmpty(struct)) {
       return struct;
     }
-    const value = next(_.get(0, struct));
-    return value === NONE ? _.pullAt(0, struct) : _.set(0, value, struct);
+    const result = next(_.get(0, struct));
+    return result === NONE ? _.pullAt(0, struct) : _.set(0, result, struct);
   }
 };
 
@@ -36,16 +36,16 @@ module.exports.LAST = {
       return struct;
     }
     const idx = struct.length - 1;
-    const value = next(_.get(idx, struct));
-    return value === NONE ? _.pullAt(idx, struct) : _.set(idx, value, struct);
+    const result = next(_.get(idx, struct));
+    return result === NONE ? _.pullAt(idx, struct) : _.set(idx, result, struct);
   }
 };
 
 module.exports.key = key => ({
   select: next => struct => next(_.get(key, struct)),
   transform: next => struct => {
-    const value = next(_.get(key, struct));
-    return value === NONE ? _.omit(key, struct) : _.set(key, value, struct);
+    const result = next(_.get(key, struct));
+    return result === NONE ? _.omit(key, struct) : _.set(key, result, struct);
   }
 });
 
