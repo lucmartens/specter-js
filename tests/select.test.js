@@ -14,52 +14,52 @@ describe("select", () => {
   });
 
   test("ALL", () => {
-    select([s.ALL], undefined, []);
-    select([s.ALL], [], []);
-    select([s.ALL], [1, 2], [1, 2]);
-    select([s.ALL], [[1, 2]], [[1, 2]]);
+    select(s.ALL, undefined, []);
+    select(s.ALL, [], []);
+    select(s.ALL, [1, 2], [1, 2]);
+    select(s.ALL, [[1, 2]], [[1, 2]]);
     select([s.ALL, s.ALL], [[1, 2]], [1, 2]);
   });
 
   test("MAP_VALS", () => {
-    select([s.MAP_VALS], undefined, []);
-    select([s.MAP_VALS], {}, []);
-    select([s.MAP_VALS], { a: 1, b: 2 }, [1, 2]);
+    select(s.MAP_VALS, undefined, []);
+    select(s.MAP_VALS, {}, []);
+    select(s.MAP_VALS, { a: 1, b: 2 }, [1, 2]);
   });
 
   test("FIRST", () => {
-    select([s.FIRST], undefined, []);
-    select([s.FIRST], [], []);
-    select([s.FIRST], [1, 2], [1]);
-    select([s.FIRST], [[1, 2]], [[1, 2]]);
+    select(s.FIRST, undefined, []);
+    select(s.FIRST, [], []);
+    select(s.FIRST, [1, 2], [1]);
+    select(s.FIRST, [[1, 2]], [[1, 2]]);
     select([s.FIRST, s.FIRST], [[1, 2]], [1]);
   });
 
   test("LAST", () => {
-    select([s.LAST], undefined, []);
-    select([s.LAST], [], []);
-    select([s.LAST], [1, 2], [2]);
-    select([s.LAST], [[1, 2]], [[1, 2]]);
+    select(s.LAST, undefined, []);
+    select(s.LAST, [], []);
+    select(s.LAST, [1, 2], [2]);
+    select(s.LAST, [[1, 2]], [[1, 2]]);
     select([s.LAST, s.LAST], [[1, 2]], [2]);
   });
 
   test("END", () => {
-    select([s.END], undefined, []);
-    select([s.END], [], []);
+    select(s.END, undefined, []);
+    select(s.END, [], []);
   });
 
   test("BEFORE_ELEMENT", () => {
-    select([s.BEFORE_ELEMENT], [], s.NONE);
+    select(s.BEFORE_ELEMENT, [], s.NONE);
   });
 
   test("AFTER_ELEMENT", () => {
-    select([s.AFTER_ELEMENT], [], s.NONE);
+    select(s.AFTER_ELEMENT, [], s.NONE);
   });
 
   test("key", () => {
-    select(["a"], undefined, [undefined]);
-    select(["a"], [], [undefined]);
-    select(["a"], { a: 1 }, [1]);
+    select("a", undefined, [undefined]);
+    select("a", [], [undefined]);
+    select("a", { a: 1 }, [1]);
     select(["a", "b"], { a: { b: 1 } }, [1]);
     select([0], [1], [1]);
     select([1], [1], [undefined]);
@@ -98,6 +98,6 @@ describe("select-one", () => {
   });
 
   test("with navigator", () => {
-    selectOne([s.FIRST], [1, 2, 3], 1);
+    selectOne(s.FIRST, [1, 2, 3], 1);
   });
 });
