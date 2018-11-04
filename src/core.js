@@ -112,7 +112,7 @@ const compilePath = (path, operator, initial) =>
   _.reduceRight(
     (navigator, next) => compileNavigator(navigator)[operator](next),
     initial,
-    path
+    _.isArray(path) ? path : [path]
   );
 
 module.exports.select = (path, struct) =>
