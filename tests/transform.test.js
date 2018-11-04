@@ -45,11 +45,13 @@ describe("transform", () => {
   test("BEGINNING", () => {
     transform([s.BEGINNING], _.constant([3, 4]), [1, 2], [3, 4, 1, 2]);
     transform([s.BEGINNING], _.constant(3), [1, 2], [3, 1, 2]);
+    transform([s.BEGINNING], _.constant([1, 2]), undefined, [1, 2]);
   });
 
   test("END", () => {
     transform([s.END], _.constant([3, 4]), [1, 2], [1, 2, 3, 4]);
     transform([s.END], _.constant(3), [1, 2], [1, 2, 3]);
+    transform([s.END], _.constant([1, 2]), undefined, [1, 2]);
   });
 
   test("BEFORE_ELEMENT", () => {
@@ -94,4 +96,8 @@ describe("transform", () => {
     transform([s.ALL, even], inc, [1, 2, 3], [1, 3, 3]);
     transform([s.ALL, even], _.constant(s.NONE), [1, 2, 3], [1, 3]);
   });
+});
+
+describe("setval", () => {
+  expect(s.setval([s.ALL, s.FIRST], 0, [[1], [2]])).toEqual([[0], [0]]);
 });

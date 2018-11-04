@@ -48,12 +48,18 @@ module.exports.LAST = {
 
 module.exports.BEGINNING = {
   select: next => struct => [],
-  transform: next => struct => _.concat(next([]), struct)
+  transform: next => struct => {
+    const result = next([]);
+    return _.isArray(struct) ? _.concat(result, struct) : result;
+  }
 };
 
 module.exports.END = {
   select: next => struct => [],
-  transform: next => struct => _.concat(struct, next([]))
+  transform: next => struct => {
+    const result = next([]);
+    return _.isArray(struct) ? _.concat(struct, result) : result;
+  }
 };
 
 module.exports.BEFORE_ELEMENT = {
@@ -117,5 +123,8 @@ module.exports.selectOne = (path, struct) =>
 
 module.exports.transform = (path, update, struct) =>
   compilePath(path, "transform", update)(struct);
+
+module.exports.setval = (path, value, struct) =>
+  compilePath(path, "transform", _.constant(value))(struct);
 
 module.exports = module.exports;
