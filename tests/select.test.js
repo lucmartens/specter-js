@@ -4,9 +4,6 @@ const s = require("../src/core");
 const select = (path, struct, expected) =>
   expect(s.select(path, struct)).toEqual(expected);
 
-const selectOne = (path, struct, expected) =>
-  expect(s.selectOne(path, struct)).toEqual(expected);
-
 describe("select", () => {
   test("Without navigators", () => {
     select([], 1, [1]);
@@ -43,17 +40,22 @@ describe("select", () => {
     select([s.LAST, s.LAST], [[1, 2]], [2]);
   });
 
+  test("BEGINNING", () => {
+    select(s.BEGINNING, undefined, []);
+    select(s.BEGINNING, [], []);
+  });
+
   test("END", () => {
     select(s.END, undefined, []);
     select(s.END, [], []);
   });
 
-  test("BEFORE_ELEMENT", () => {
-    select(s.BEFORE_ELEMENT, [], s.NONE);
+  test("BEFORE_ELEM", () => {
+    select(s.BEFORE_ELEM, [], s.NONE);
   });
 
-  test("AFTER_ELEMENT", () => {
-    select(s.AFTER_ELEMENT, [], s.NONE);
+  test("AFTER_ELEM", () => {
+    select(s.AFTER_ELEM, [], s.NONE);
   });
 
   test("key", () => {
@@ -91,13 +93,24 @@ describe("select", () => {
   });
 });
 
-describe("select-one", () => {
-  test("without navigators", () => {
-    selectOne([], 1, 1);
-    selectOne([], [], []);
+describe("select variants", () => {
+  const data = [{ a: 1 }, { a: 2 }];
+  const path = [s.ALL, "a", v => v > 1];
+  const compiledPath = s.compile(path);
+
+  test("select", () => {
+    expect(s.select(path, data)).toEqual([2]);
   });
 
-  test("with navigator", () => {
-    selectOne(s.FIRST, [1, 2, 3], 1);
+  test("compiled select", () => {
+    expect(s.compiledSelect(compiledPath, data)).toEqual([2]);
+  });
+
+  test("select-one", () => {
+    expect(s.selectOne(path, data)).toEqual([2]);
+  });
+
+  test("compiled select-one", () => {
+    expect(s.compiledSelectOne(compiledPath, data)).toEqual([2]);
   });
 });

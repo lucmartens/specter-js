@@ -54,14 +54,16 @@ describe("transform", () => {
     transform(s.END, _.constant([1, 2]), undefined, [1, 2]);
   });
 
-  test("BEFORE_ELEMENT", () => {
-    transform(s.BEFORE_ELEMENT, _.constant([3, 4]), [1, 2], [[3, 4], 1, 2]);
-    transform(s.BEFORE_ELEMENT, _.constant(3), [1, 2], [3, 1, 2]);
+  test("BEFORE_ELEM", () => {
+    transform(s.BEFORE_ELEM, _.constant([3, 4]), [1, 2], [[3, 4], 1, 2]);
+    transform(s.BEFORE_ELEM, _.constant(3), [1, 2], [3, 1, 2]);
+    transform(s.BEFORE_ELEM, _.constant(s.NONE), [1, 2], [1, 2]);
   });
 
-  test("AFTER_ELEMENT", () => {
-    transform(s.AFTER_ELEMENT, _.constant([3, 4]), [1, 2], [1, 2, [3, 4]]);
-    transform(s.AFTER_ELEMENT, _.constant(3), [1, 2], [1, 2, 3]);
+  test("AFTER_ELEM", () => {
+    transform(s.AFTER_ELEM, _.constant([3, 4]), [1, 2], [1, 2, [3, 4]]);
+    transform(s.AFTER_ELEM, _.constant(3), [1, 2], [1, 2, 3]);
+    transform(s.AFTER_ELEM, _.constant(s.NONE), [1, 2], [1, 2]);
   });
 
   test("key", () => {
@@ -98,6 +100,25 @@ describe("transform", () => {
   });
 });
 
-describe("setval", () => {
-  expect(s.setval([s.ALL, s.FIRST], 0, [[1], [2]])).toEqual([[0], [0]]);
+describe("transform variants", () => {
+  const data = [{ a: 1 }, { a: 2 }];
+  const expected = [{ a: 1 }, { a: 3 }];
+  const path = [s.ALL, "a", v => v > 1];
+  const compiledPath = s.compile(path);
+
+  test("transform", () => {
+    expect(s.transform(path, inc, data)).toEqual(expected);
+  });
+
+  test("compiled transform", () => {
+    expect(s.compiledTransform(compiledPath, inc, data)).toEqual(expected);
+  });
+
+  test("setval", () => {
+    expect(s.setval(path, 3, data)).toEqual(expected);
+  });
+
+  test("compiled setval", () => {
+    expect(s.compiledSetval(compiledPath, 3, data)).toEqual(expected);
+  });
 });
