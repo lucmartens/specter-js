@@ -54,14 +54,16 @@ describe("transform", () => {
     transform(s.END, _.constant([1, 2]), undefined, [1, 2]);
   });
 
-  test("BEFORE_ELEMENT", () => {
-    transform(s.BEFORE_ELEMENT, _.constant([3, 4]), [1, 2], [[3, 4], 1, 2]);
-    transform(s.BEFORE_ELEMENT, _.constant(3), [1, 2], [3, 1, 2]);
+  test("BEFORE_ELEM", () => {
+    transform(s.BEFORE_ELEM, _.constant([3, 4]), [1, 2], [[3, 4], 1, 2]);
+    transform(s.BEFORE_ELEM, _.constant(3), [1, 2], [3, 1, 2]);
+    transform(s.BEFORE_ELEM, _.constant(s.NONE), [1, 2], [1, 2]);
   });
 
-  test("AFTER_ELEMENT", () => {
-    transform(s.AFTER_ELEMENT, _.constant([3, 4]), [1, 2], [1, 2, [3, 4]]);
-    transform(s.AFTER_ELEMENT, _.constant(3), [1, 2], [1, 2, 3]);
+  test("AFTER_ELEM", () => {
+    transform(s.AFTER_ELEM, _.constant([3, 4]), [1, 2], [1, 2, [3, 4]]);
+    transform(s.AFTER_ELEM, _.constant(3), [1, 2], [1, 2, 3]);
+    transform(s.AFTER_ELEM, _.constant(s.NONE), [1, 2], [1, 2]);
   });
 
   test("key", () => {

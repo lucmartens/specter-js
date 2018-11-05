@@ -69,7 +69,7 @@ module.exports.END = navigator({
   }
 });
 
-module.exports.BEFORE_ELEMENT = navigator({
+module.exports.BEFORE_ELEM = navigator({
   select: next => struct => NONE,
   transform: next => struct => {
     const result = next(NONE);
@@ -77,7 +77,7 @@ module.exports.BEFORE_ELEMENT = navigator({
   }
 });
 
-module.exports.AFTER_ELEMENT = navigator({
+module.exports.AFTER_ELEM = navigator({
   select: next => struct => NONE,
   transform: next => struct => {
     const result = next(NONE);

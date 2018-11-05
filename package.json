@@ -5,6 +5,9 @@
   "module": "dist/specter-js.esm.js",
   "browser": "dist/specter-js.umd.js",
   "license": "MIT",
+  "jest": {
+    "collectCoverage": true
+  },
   "scripts": {
     "test": "yarn jest",
     "start": "rollup -c -w",

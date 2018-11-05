@@ -40,17 +40,22 @@ describe("select", () => {
     select([s.LAST, s.LAST], [[1, 2]], [2]);
   });
 
+  test("BEGINNING", () => {
+    select(s.BEGINNING, undefined, []);
+    select(s.BEGINNING, [], []);
+  });
+
   test("END", () => {
     select(s.END, undefined, []);
     select(s.END, [], []);
   });
 
-  test("BEFORE_ELEMENT", () => {
-    select(s.BEFORE_ELEMENT, [], s.NONE);
+  test("BEFORE_ELEM", () => {
+    select(s.BEFORE_ELEM, [], s.NONE);
   });
 
-  test("AFTER_ELEMENT", () => {
-    select(s.AFTER_ELEMENT, [], s.NONE);
+  test("AFTER_ELEM", () => {
+    select(s.AFTER_ELEM, [], s.NONE);
   });
 
   test("key", () => {
