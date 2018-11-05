@@ -3,16 +3,16 @@ const _ = require("lodash/fp");
 _.mixin({
   cons: (a, b) => _.concat([a], b),
   conj: (b, a) => _.concat(b, [a]),
-  isNavigator: f => f && f.isNavigator
+  isNavigator: f => _.isFunction(f) && f.isNavigator
 });
 
 const NONE = Symbol("NONE");
 module.exports.NONE = NONE;
 
 const navigator = m => {
-  const chain = next => operation => m[operation](next(operation));
-  chain.isNavigator = true;
-  return chain;
+  const fn = next => operation => m[operation](next(operation));
+  fn.isNavigator = true;
+  return fn;
 };
 
 module.exports.ALL = navigator({
@@ -121,15 +121,14 @@ const navigatorAlias = _.cond([
 ]);
 
 const compile = path => {
-  let defer = {};
-  path = Array.isArray(path) ? path : [path];
+  let defer;
+  path = _.isArray(path) ? path : [path];
 
   const compose = (nav, next) => navigatorAlias(nav)(next);
-  const compiled = _.reduceRight(compose, op => v => defer.lastFn(v), path);
+  const compiled = _.reduceRight(compose, op => v => defer(v), path);
 
   return (operation, lastFn, struct) => {
-    defer.lastFn = lastFn;
-    defer.operation = operation;
+    defer = lastFn;
     return compiled(operation)(struct);
   };
 };
