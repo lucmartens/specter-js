@@ -99,10 +99,6 @@ describe("transform", () => {
 });
 
 describe("transform variants", () => {
-  expect(s.setval([s.ALL, s.FIRST], 0, [[1], [2]])).toEqual([[0], [0]]);
-});
-
-describe("transform variants", () => {
   const data = [{ a: 1 }, { a: 2 }];
   const expected = [{ a: 1 }, { a: 3 }];
   const path = [s.ALL, "a", v => v > 1];
