@@ -2,7 +2,7 @@ const _ = require("lodash/fp");
 
 _.mixin({
   cons: (a, b) => _.concat([a], b),
-  conj: (b, a) => _.concat(b, [a]),
+  conj: (b, a) => [...b, a],
   isNavigator: f => _.isFunction(f) && f.isNavigator
 });
 
@@ -17,16 +17,27 @@ const navigator = m => {
 
 module.exports.ALL = navigator({
   select: next => _.flatMap(next),
-  transform: next =>
-    _.reduce((acc, v) => {
+  transform: next => struct => {
+    const acc = [];
+    for (let v of struct) {
       const result = next(v);
-      return result === NONE ? acc : _.conj(acc, result);
-    }, [])
+      if (result !== NONE) {
+        acc.push(result);
+      }
+    }
+    return acc;
+  }
 });
 
 module.exports.MAP_VALS = navigator({
   select: next => struct => _.flatMap(next, _.values(struct)),
-  transform: next => struct => _.mapValues(next, struct)
+  transform: next => struct => {
+    const acc = {};
+    for (let [k, v] of Object.entries(struct)) {
+      acc[k] = next(v);
+    }
+    return acc;
+  }
 });
 
 module.exports.MAP_KEYS = navigator({
@@ -180,19 +191,30 @@ module.exports.filterer = path => {
   });
 };
 
-const resolveNavigator = _.cond([
-  [_.isNavigator, _.identity],
-  [_.isString, module.exports.key],
-  [_.isNumber, module.exports.key],
-  [_.isFunction, module.exports.pred]
-]);
+const resolveNavigator = nav => {
+  const type = typeof nav;
+  if (type === "function" && nav.isNavigator) {
+    return nav;
+  }
+
+  switch (type) {
+    case "string":
+      return module.exports.key(nav);
+    case "number":
+      return module.exports.key(nav);
+    case "function":
+      return module.exports.pred(nav);
+  }
+};
 
 const compile = path => {
   let defer;
-  path = _.isArray(path) ? path : [path];
+  path = Array.isArray(path) ? path : [path];
 
-  const compose = (nav, next) => resolveNavigator(nav)(next);
-  const compiled = _.reduceRight(compose, op => v => defer(v), path);
+  let compiled = op => v => defer(v);
+  for (let i = path.length - 1; i >= 0; i--) {
+    compiled = resolveNavigator(path[i])(compiled);
+  }
 
   return (operation, lastFn, struct) => {
     defer = lastFn;
