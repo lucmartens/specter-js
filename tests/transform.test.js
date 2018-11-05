@@ -98,6 +98,29 @@ describe("transform", () => {
   });
 });
 
-describe("setval", () => {
+describe("transform variants", () => {
   expect(s.setval([s.ALL, s.FIRST], 0, [[1], [2]])).toEqual([[0], [0]]);
+});
+
+describe("transform variants", () => {
+  const data = [{ a: 1 }, { a: 2 }];
+  const expected = [{ a: 1 }, { a: 3 }];
+  const path = [s.ALL, "a", v => v > 1];
+  const compiledPath = s.compile(path);
+
+  test("transform", () => {
+    expect(s.transform(path, inc, data)).toEqual(expected);
+  });
+
+  test("compiled transform", () => {
+    expect(s.compiledTransform(compiledPath, inc, data)).toEqual(expected);
+  });
+
+  test("setval", () => {
+    expect(s.setval(path, 3, data)).toEqual(expected);
+  });
+
+  test("compiled setval", () => {
+    expect(s.compiledSetval(compiledPath, 3, data)).toEqual(expected);
+  });
 });
