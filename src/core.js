@@ -112,19 +112,18 @@ module.exports.submap = keys =>
     transform: next => struct => _.merge(struct, next(_.pick(keys, struct)))
   });
 
-const navigatorAlias = _.cond([
+const resolveNavigator = _.cond([
   [_.isNavigator, _.identity],
   [_.isString, module.exports.key],
   [_.isNumber, module.exports.key],
-  [_.isFunction, module.exports.pred],
-  [_.stubTrue, _.identity]
+  [_.isFunction, module.exports.pred]
 ]);
 
 const compile = path => {
   let defer;
   path = _.isArray(path) ? path : [path];
 
-  const compose = (nav, next) => navigatorAlias(nav)(next);
+  const compose = (nav, next) => resolveNavigator(nav)(next);
   const compiled = _.reduceRight(compose, op => v => defer(v), path);
 
   return (operation, lastFn, struct) => {
