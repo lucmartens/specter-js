@@ -108,6 +108,11 @@ describe("transform", () => {
     transform([s.submap(["a"]), s.MAP_VALS], inc, { a: 1 }, { a: 2 });
   });
 
+  test("view", () => {
+    transform(s.view(inc), inc, 0, 2);
+    transform([s.ALL, s.view(inc)], inc, [0, 1, 2], [2, 3, 4]);
+  });
+
   test("complex", () => {
     transform([s.ALL, even], inc, [1, 2, 3], [1, 3, 3]);
     transform([s.ALL, even], _.constant(s.NONE), [1, 2, 3], [1, 3]);

@@ -129,6 +129,12 @@ module.exports.submap = keys =>
     transform: next => struct => _.merge(struct, next(_.pick(keys, struct)))
   });
 
+module.exports.view = fn =>
+  navigator({
+    select: next => struct => next(fn(struct)),
+    transform: next => struct => next(fn(struct))
+  });
+
 const resolveNavigator = _.cond([
   [_.isNavigator, _.identity],
   [_.isString, module.exports.key],
