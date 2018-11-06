@@ -23,7 +23,21 @@ describe("transform", () => {
   test("MAP_VALS", () => {
     transform(s.MAP_VALS, inc, {}, {});
     transform(s.MAP_VALS, inc, { a: 1 }, { a: 2 });
-    transform(s.MAP_VALS, inc, [1, 2], [2, 3]);
+  });
+
+  test("MAP_KEYS", () => {
+    transform(s.MAP_KEYS, inc, {}, {});
+    transform(s.MAP_KEYS, v => v + "b", { a: "a" }, { ab: "a" });
+  });
+
+  test("MAP_ENTRIES", () => {
+    transform(s.MAP_ENTRIES, _.identity, {}, {});
+    transform(
+      s.MAP_ENTRIES,
+      ([k, v]) => [k + "b", v + "b"],
+      { a: "a" },
+      { ab: "ab" }
+    );
   });
 
   test("FIRST", () => {

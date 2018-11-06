@@ -26,8 +26,25 @@ module.exports.ALL = navigator({
 
 module.exports.MAP_VALS = navigator({
   select: next => struct => _.flatMap(next, _.values(struct)),
+  transform: next => struct => _.mapValues(next, struct)
+});
+
+module.exports.MAP_KEYS = navigator({
+  select: next => struct => _.flatMap(next, _.keys(struct)),
+  transform: next => struct => _.mapKeys(next, struct)
+});
+
+module.exports.MAP_ENTRIES = navigator({
+  select: next => struct => _.flatMap(next, Object.entries(struct)),
   transform: next => struct =>
-    _.isPlainObject(struct) ? _.mapValues(next, struct) : _.map(next, struct)
+    _.reduce(
+      (acc, [k, v]) => {
+        const result = next([k, v]);
+        return { ...acc, [result[0]]: result[1] };
+      },
+      {},
+      Object.entries(struct)
+    )
 });
 
 module.exports.FIRST = navigator({
