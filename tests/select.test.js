@@ -5,6 +5,7 @@ const select = (path, struct, expected) =>
   expect(s.select(path, struct)).toEqual(expected);
 
 const inc = v => v + 1;
+const even = v => v % 2 == 0;
 
 describe("select", () => {
   test("Without navigators", () => {
@@ -101,6 +102,12 @@ describe("select", () => {
   test("view", () => {
     select(s.view(inc), 1, [2]);
     select([s.FIRST, s.view(inc)], [1, 2, 3], [2]);
+  });
+
+  test("filterer", () => {
+    select(s.filterer(even), [1, 2, 3, 4], [[2, 4]]);
+    select([s.filterer(even), s.ALL], [1, 2, 3, 4], [2, 4]);
+    // select(s.filterer([s.ALL, even]), [[1, 2, 3, 4]], [[[2, 4]]]);
   });
 
   test("complex", () => {

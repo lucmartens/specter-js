@@ -135,6 +135,51 @@ module.exports.view = fn =>
     transform: next => struct => next(fn(struct))
   });
 
+module.exports.filterer = path => {
+  const compiledPath = compile(path);
+  return navigator({
+    select: next => struct =>
+      next(
+        _.reduce(
+          (acc, v) => {
+            const result = module.exports.compiledSelect(compiledPath, v);
+            return result.length ? [...acc, v] : acc;
+          },
+          [],
+          struct
+        )
+      ),
+    transform: next => struct => {
+      const mapping = {};
+      const filtered = [];
+      for (let [i, j] = [0, 0]; i < struct.length; i++) {
+        const selected = module.exports.compiledSelect(compiledPath, struct[i]);
+        if (selected.length) {
+          mapping[i] = j;
+          j++;
+          filtered.push(...selected);
+        }
+      }
+
+      const transformed = next(filtered);
+      const result = [];
+      for (let i = 0; i < struct.length; i++) {
+        const mappedIdx = mapping[i];
+
+        if (mappedIdx !== undefined) {
+          if (transformed[mappedIdx] !== undefined) {
+            result.push(transformed[mappedIdx]);
+          }
+        } else {
+          result.push(struct[i]);
+        }
+      }
+
+      return result;
+    }
+  });
+};
+
 const resolveNavigator = _.cond([
   [_.isNavigator, _.identity],
   [_.isString, module.exports.key],
