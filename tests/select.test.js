@@ -14,7 +14,6 @@ describe("select", () => {
   });
 
   test("ALL", () => {
-    select(s.ALL, undefined, []);
     select(s.ALL, [], []);
     select(s.ALL, [1, 2], [1, 2]);
     select(s.ALL, [[1, 2]], [[1, 2]]);
@@ -22,13 +21,11 @@ describe("select", () => {
   });
 
   test("MAP_VALS", () => {
-    select(s.MAP_VALS, undefined, []);
     select(s.MAP_VALS, {}, []);
     select(s.MAP_VALS, { a: 1, b: 2 }, [1, 2]);
   });
 
   test("MAP_KEYS", () => {
-    select(s.MAP_KEYS, undefined, []);
     select(s.MAP_KEYS, {}, []);
     select(s.MAP_KEYS, { a: 1, b: 2 }, ["a", "b"]);
   });
@@ -111,7 +108,6 @@ describe("select", () => {
   });
 
   test("complex", () => {
-    select([s.ALL, s.FIRST], undefined, []);
     select([s.ALL, s.FIRST], [[1, 2], [1, 2]], [1, 1]);
     select([s.ALL, "a"], [{ a: 1 }, { a: 1 }], [1, 1]);
     select([s.ALL, "a", v => v > 1], [{ a: 1 }, { a: 2 }], [2]);

@@ -8,7 +8,7 @@ const data = { a: [{ aa: 1, bb: 2 }, { cc: 3 }], b: [{ dd: 4 }] };
 const inc = v => v + 1;
 const even = v => v % 2 === 0;
 
-const compiled = s.compile([s.MAP_VALS, s.ALL, s.MAP_VALS]);
+const compiled = s.compile([s.MAP_VALS, s.ALL, s.MAP_KEYS]);
 
 suite
   .add("naive native", function() {
@@ -29,7 +29,7 @@ suite
     );
   })
   .add("uncompiled", function() {
-    s.transform([s.MAP_VALS, s.ALL, s.MAP_VALS], inc, data);
+    s.transform([s.MAP_VALS, s.ALL, s.MAP_KEYS], v => v, data);
   })
   .add("precompiled", function() {
     s.compiledTransform(compiled, inc, data);
