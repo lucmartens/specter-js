@@ -6,6 +6,7 @@ const transform = (path, fn, struct, expected) =>
 
 const inc = v => v + 1;
 const even = v => v % 2 == 0;
+const odd = v => v % 2 !== 0;
 
 describe("transform", () => {
   test("Without navigators", () => {
@@ -106,6 +107,28 @@ describe("transform", () => {
     transform([s.submap([])], _.identity, { a: 1, b: 2 }, { a: 1, b: 2 });
     transform([s.submap([]), s.MAP_VALS], inc, { a: 1 }, { a: 1 });
     transform([s.submap(["a"]), s.MAP_VALS], inc, { a: 1 }, { a: 2 });
+  });
+
+  test("view", () => {
+    transform(s.view(inc), inc, 0, 2);
+    transform([s.ALL, s.view(inc)], inc, [0, 1, 2], [2, 3, 4]);
+  });
+
+  test("filterer", () => {
+    expect(_.reverse([1, 2, 3])).toEqual([3, 2, 1]);
+    transform(s.filterer(even), _.reverse, [1, 2, 3, 4, 5], [1, 4, 3, 2, 5]);
+    transform(
+      [s.filterer(even), s.ALL],
+      _.constant(s.NONE),
+      [1, 2, 3, 4, 5],
+      [1, 3, 5]
+    );
+    transform(
+      [s.filterer(odd), s.LAST],
+      inc,
+      [1, 2, 3, 4, 5, 6, 7, 8],
+      [1, 2, 3, 4, 5, 6, 8, 8]
+    );
   });
 
   test("complex", () => {

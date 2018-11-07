@@ -4,6 +4,9 @@ const s = require("../src/core");
 const select = (path, struct, expected) =>
   expect(s.select(path, struct)).toEqual(expected);
 
+const inc = v => v + 1;
+const even = v => v % 2 == 0;
+
 describe("select", () => {
   test("Without navigators", () => {
     select([], 1, [1]);
@@ -94,6 +97,17 @@ describe("select", () => {
   test("submap", () => {
     select([s.submap(["a", "b"])], { a: 1, b: 2, c: 3 }, [{ a: 1, b: 2 }]);
     select([s.submap([])], { a: 1, b: 2, c: 3 }, [{}]);
+  });
+
+  test("view", () => {
+    select(s.view(inc), 1, [2]);
+    select([s.FIRST, s.view(inc)], [1, 2, 3], [2]);
+  });
+
+  test("filterer", () => {
+    select(s.filterer(even), [1, 2, 3, 4], [[2, 4]]);
+    select([s.filterer(even), s.ALL], [1, 2, 3, 4], [2, 4]);
+    // select(s.filterer([s.ALL, even]), [[1, 2, 3, 4]], [[[2, 4]]]);
   });
 
   test("complex", () => {
