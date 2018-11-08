@@ -9,7 +9,7 @@
     "collectCoverage": true
   },
   "scripts": {
-    "test": "yarn jest",
+    "test": "yarn jest && node benchmark/reference.js",
     "start": "rollup -c -w",
     "build": "rollup -c",
     "bench": "node ./benchmark/transform.js"
