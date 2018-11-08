@@ -1,11 +1,6 @@
-const _ = require("lodash/fp");
+const impl = require("./impl");
 
-_.mixin({
-  cons: (a, b) => _.concat([a], b),
-  conj: (b, a) => [...b, a]
-});
-
-const NONE = Symbol("NONE");
+const NONE = impl.NONE;
 module.exports.NONE = NONE;
 
 const navigator = m => {
@@ -14,149 +9,48 @@ const navigator = m => {
   return fn;
 };
 
-function curry(targetfn) {
-  var numOfArgs = targetfn.length;
-  return function fn() {
-    if (arguments.length < numOfArgs) {
-      return fn.bind(null, ...arguments);
-    } else {
-      return targetfn.apply(null, arguments);
-    }
-  };
-}
-
-const map = curry((fn, struct) => {
-  const acc = [];
-  if (!struct || !struct[Symbol.iterator]) {
-    return acc;
-  }
-
-  for (let v of struct) {
-    const result = fn(v);
-    if (result === NONE) {
-      continue;
-    } else {
-      acc.push(result);
-    }
-  }
-  return acc;
-});
-
-const flatMap = (fn, struct) => {
-  const acc = [];
-  for (let v of struct) {
-    const result = fn(v);
-    if (result === NONE) {
-      continue;
-    } else if (Array.isArray(result)) {
-      acc.push(...result);
-    } else {
-      acc.push(result);
-    }
-  }
-  return acc;
-};
-
-const mapValues = (fn, struct) => {
-  const acc = {};
-  for (let [k, v] of Object.entries(struct)) {
-    const result = fn(v);
-    if (result !== NONE) {
-      acc[k] = result;
-    }
-  }
-  return acc;
-};
-
-const mapKeys = (fn, struct) => {
-  const acc = {};
-  for (let [k, v] of Object.entries(struct)) {
-    const result = fn(k);
-    if (result !== NONE) {
-      acc[result] = v;
-    }
-  }
-  return acc;
-};
-
-const mapEntries = curry((fn, struct) => {
-  const acc = {};
-  for (let entry of Object.entries(struct)) {
-    const result = fn(entry);
-    if (result !== NONE) {
-      acc[result[0]] = result[1];
-    }
-  }
-  return acc;
-});
-
-const updateArray = curry((idx, fn, struct) => {
-  const result = fn(struct[idx]);
-  if (result === NONE) {
-    return [...struct.slice(0, idx), ...struct.slice(idx + 1)];
-  } else {
-    return [...struct.slice(0, idx), result, ...struct.slice(idx + 1)];
-  }
-});
-
-const reduceRight = (fn, initial, struct) => {
-  let acc = initial;
-  for (let i = struct.length - 1; i >= 0; i--) {
-    acc = fn(acc, struct[i]);
-  }
-  return acc;
-};
-
-const pre = (conds, yes, no) => v => (conds.every(c => c(v)) ? yes(v) : no);
-
-const isIterable = obj => obj && typeof obj[Symbol.iterator] === "function";
-
-const isObject = obj => obj && obj.constructor == Object;
-
-const values = v => Object.values(v);
-
-const keys = v => Object.keys(v);
-
-const entries = v => Object.entries(v);
-
 module.exports.ALL = navigator({
-  select: next => struct => flatMap(next, struct),
-  transform: next => struct => map(next, struct)
+  select: next => struct => impl.flatMap(next, struct),
+  transform: next => struct => impl.map(next, struct)
 });
 
 module.exports.MAP_VALS = navigator({
-  select: next => struct => flatMap(next, values(struct)),
-  transform: next => struct => mapValues(next, struct)
+  select: next => struct => impl.flatMap(next, impl.values(struct)),
+  transform: next => struct => impl.mapValues(next, struct)
 });
 
 module.exports.MAP_KEYS = navigator({
-  select: next => struct => flatMap(next, keys(struct)),
-  transform: next => struct => mapKeys(next, struct)
+  select: next => struct => impl.flatMap(next, impl.keys(struct)),
+  transform: next => struct => impl.mapKeys(next, struct)
 });
 
 module.exports.MAP_ENTRIES = navigator({
-  select: next => struct => flatMap(next, entries(struct)),
-  transform: next => struct => mapEntries(next, struct)
+  select: next => struct => impl.flatMap(next, impl.entries(struct)),
+  transform: next => struct => impl.mapEntries(next, struct)
 });
 
 module.exports.FIRST = navigator({
-  select: next => struct => (_.isEmpty(struct) ? [] : next(struct[0])),
+  select: next => struct => (impl.isEmpty(struct) ? [] : next(struct[0])),
   transform: next => struct =>
-    _.isEmpty(struct) ? struct : updateArray(0, next, struct)
+    impl.isEmpty(struct) ? struct : impl.updateArray(0, next, struct)
 });
 
 module.exports.LAST = navigator({
   select: next => struct =>
-    _.isEmpty(struct) ? [] : next(struct[struct.length - 1]),
+    impl.isEmpty(struct) ? [] : next(struct[struct.length - 1]),
   transform: next => struct =>
-    _.isEmpty(struct) ? struct : updateArray(struct.length - 1, next, struct)
+    impl.isEmpty(struct)
+      ? struct
+      : impl.updateArray(struct.length - 1, next, struct)
 });
 
 module.exports.BEGINNING = navigator({
   select: next => struct => [],
   transform: next => struct => {
     const result = next([]);
-    return _.isArray(struct) ? _.concat(result, struct) : result;
+    return impl.isArray(result)
+      ? impl.concat(result, struct)
+      : [result, ...struct];
   }
 });
 
@@ -164,7 +58,7 @@ module.exports.END = navigator({
   select: next => struct => [],
   transform: next => struct => {
     const result = next([]);
-    return _.isArray(struct) ? _.concat(struct, result) : result;
+    return impl.concat(struct, result);
   }
 });
 
@@ -172,7 +66,7 @@ module.exports.BEFORE_ELEM = navigator({
   select: next => struct => NONE,
   transform: next => struct => {
     const result = next(NONE);
-    return result === NONE ? struct : _.cons(result, struct);
+    return result === NONE ? struct : impl.cons(result, struct);
   }
 });
 
@@ -180,16 +74,18 @@ module.exports.AFTER_ELEM = navigator({
   select: next => struct => NONE,
   transform: next => struct => {
     const result = next(NONE);
-    return result === NONE ? struct : _.conj(struct, result);
+    return result === NONE ? struct : impl.conj(struct, result);
   }
 });
 
 module.exports.key = key =>
   navigator({
-    select: next => struct => next(_.get(key, struct)),
+    select: next => struct => next(struct[key]),
     transform: next => struct => {
-      const result = next(_.get(key, struct));
-      return result === NONE ? _.omit(key, struct) : _.set(key, result, struct);
+      const result = next(struct[key]);
+      return result === NONE
+        ? impl.omit(key, struct)
+        : impl.set(key, result, struct);
     }
   });
 
@@ -207,8 +103,9 @@ module.exports.parser = (parse, unparse) =>
 
 module.exports.submap = keys =>
   navigator({
-    select: next => struct => next(_.pick(keys, struct)),
-    transform: next => struct => _.merge(struct, next(_.pick(keys, struct)))
+    select: next => struct => next(impl.pick(keys, struct)),
+    transform: next => struct =>
+      impl.merge(struct, next(impl.pick(keys, struct)))
   });
 
 module.exports.view = fn =>
@@ -222,7 +119,7 @@ module.exports.filterer = path => {
   return navigator({
     select: next => struct =>
       next(
-        _.reduce(
+        impl.reduce(
           (acc, v) => {
             const result = module.exports.compiledSelect(compiledPath, v);
             return result.length ? [...acc, v] : acc;
@@ -281,7 +178,7 @@ const resolveNavigator = nav => {
 const compile = path => {
   let defer;
 
-  const compiled = reduceRight(
+  const compiled = impl.reduceRight(
     (acc, nav) => resolveNavigator(nav)(acc),
     op => v => defer(v),
     Array.isArray(path) ? path : [path]

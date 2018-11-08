@@ -1,4 +1,3 @@
-const _ = require("lodash/fp");
 const s = require("../src/core");
 
 const transform = (path, fn, struct, expected) =>
@@ -7,18 +6,21 @@ const transform = (path, fn, struct, expected) =>
 const inc = v => v + 1;
 const even = v => v % 2 == 0;
 const odd = v => v % 2 !== 0;
+const identity = v => v;
+const constant = v => () => v;
+const reverse = v => v.slice().reverse();
 
 describe("transform", () => {
   test("Without navigators", () => {
-    transform([], _.identity, 1, 1);
-    transform([], _.identity, [], []);
+    transform([], identity, 1, 1);
+    transform([], identity, [], []);
   });
 
   test("ALL", () => {
-    transform(s.ALL, _.identity, [1], [1]);
+    transform(s.ALL, identity, [1], [1]);
     transform(s.ALL, inc, [1, 2], [2, 3]);
     transform([s.ALL, s.ALL], inc, [[1, 2], [3, 4]], [[2, 3], [4, 5]]);
-    transform(s.ALL, _.constant(s.NONE), [1, 2, 3], []);
+    transform(s.ALL, constant(s.NONE), [1, 2, 3], []);
   });
 
   test("MAP_VALS", () => {
@@ -32,7 +34,7 @@ describe("transform", () => {
   });
 
   test("MAP_ENTRIES", () => {
-    transform(s.MAP_ENTRIES, _.identity, {}, {});
+    transform(s.MAP_ENTRIES, identity, {}, {});
     transform(
       s.MAP_ENTRIES,
       ([k, v]) => [k + "b", v + "b"],
@@ -42,51 +44,45 @@ describe("transform", () => {
   });
 
   test("FIRST", () => {
-    transform(s.FIRST, _.identity, 1, 1); // clojure would throw an exception
-    transform(s.FIRST, _.identity, [], []);
+    transform(s.FIRST, identity, [], []);
     transform(s.FIRST, inc, [1, 2], [2, 2]);
     transform([s.FIRST, s.FIRST], inc, [[1], 2], [[2], 2]);
-    transform(s.FIRST, _.constant(s.NONE), [[1], 2], [2]);
+    transform(s.FIRST, constant(s.NONE), [[1], 2], [2]);
   });
 
   test("LAST", () => {
-    transform(s.LAST, _.identity, 1, 1); // clojure would throw an exception
-    transform(s.LAST, _.identity, [], []);
+    transform(s.LAST, identity, [], []);
     transform(s.LAST, inc, [1, 2], [1, 3]);
     transform([s.LAST, s.LAST], inc, [1, [2]], [1, [3]]);
-    transform(s.LAST, _.constant(s.NONE), [[1], 2], [[1]]);
+    transform(s.LAST, constant(s.NONE), [[1], 2], [[1]]);
   });
 
   test("BEGINNING", () => {
-    transform(s.BEGINNING, _.constant([3, 4]), [1, 2], [3, 4, 1, 2]);
-    transform(s.BEGINNING, _.constant(3), [1, 2], [3, 1, 2]);
-    transform(s.BEGINNING, _.constant([1, 2]), undefined, [1, 2]);
+    transform(s.BEGINNING, constant([3, 4]), [1, 2], [3, 4, 1, 2]);
+    transform(s.BEGINNING, constant(3), [1, 2], [3, 1, 2]);
   });
 
   test("END", () => {
-    transform(s.END, _.constant([3, 4]), [1, 2], [1, 2, 3, 4]);
-    transform(s.END, _.constant(3), [1, 2], [1, 2, 3]);
-    transform(s.END, _.constant([1, 2]), undefined, [1, 2]);
+    transform(s.END, constant([3, 4]), [1, 2], [1, 2, 3, 4]);
+    transform(s.END, constant(3), [1, 2], [1, 2, 3]);
   });
 
   test("BEFORE_ELEM", () => {
-    transform(s.BEFORE_ELEM, _.constant([3, 4]), [1, 2], [[3, 4], 1, 2]);
-    transform(s.BEFORE_ELEM, _.constant(3), [1, 2], [3, 1, 2]);
-    transform(s.BEFORE_ELEM, _.constant(s.NONE), [1, 2], [1, 2]);
+    transform(s.BEFORE_ELEM, constant([3, 4]), [1, 2], [[3, 4], 1, 2]);
+    transform(s.BEFORE_ELEM, constant(3), [1, 2], [3, 1, 2]);
+    transform(s.BEFORE_ELEM, constant(s.NONE), [1, 2], [1, 2]);
   });
 
   test("AFTER_ELEM", () => {
-    transform(s.AFTER_ELEM, _.constant([3, 4]), [1, 2], [1, 2, [3, 4]]);
-    transform(s.AFTER_ELEM, _.constant(3), [1, 2], [1, 2, 3]);
-    transform(s.AFTER_ELEM, _.constant(s.NONE), [1, 2], [1, 2]);
+    transform(s.AFTER_ELEM, constant([3, 4]), [1, 2], [1, 2, [3, 4]]);
+    transform(s.AFTER_ELEM, constant(3), [1, 2], [1, 2, 3]);
+    transform(s.AFTER_ELEM, constant(s.NONE), [1, 2], [1, 2]);
   });
 
   test("key", () => {
-    transform(["a"], _.identity, 1, 1); // clojure would throw an exception
-    transform(["a"], _.identity, [], []);
     transform(["a"], inc, { a: 1, b: 2 }, { a: 2, b: 2 });
     transform(["a", "b"], inc, { a: { b: 1, a: 1 } }, { a: { b: 2, a: 1 } });
-    transform(["a"], _.constant(s.NONE), { a: 1, b: 2 }, { b: 2 });
+    transform(["a"], constant(s.NONE), { a: 1, b: 2 }, { b: 2 });
   });
 
   test("pred", () => {
@@ -98,13 +94,13 @@ describe("transform", () => {
     const parse = time => time.split(".");
     const unparse = splitTime => splitTime.join(".");
     const parser = s.parser(parse, unparse);
-    transform([parser], _.identity, "10.35", "10.35");
+    transform([parser], identity, "10.35", "10.35");
     transform([parser], v => [v[0]], "10.35", "10");
-    transform([parser, s.FIRST], _.constant(s.NONE), "10.35", "35");
+    transform([parser, s.FIRST], constant(s.NONE), "10.35", "35");
   });
 
   test("submap", () => {
-    transform([s.submap([])], _.identity, { a: 1, b: 2 }, { a: 1, b: 2 });
+    transform([s.submap([])], identity, { a: 1, b: 2 }, { a: 1, b: 2 });
     transform([s.submap([]), s.MAP_VALS], inc, { a: 1 }, { a: 1 });
     transform([s.submap(["a"]), s.MAP_VALS], inc, { a: 1 }, { a: 2 });
   });
@@ -115,11 +111,11 @@ describe("transform", () => {
   });
 
   test("filterer", () => {
-    expect(_.reverse([1, 2, 3])).toEqual([3, 2, 1]);
-    transform(s.filterer(even), _.reverse, [1, 2, 3, 4, 5], [1, 4, 3, 2, 5]);
+    expect(reverse([1, 2, 3])).toEqual([3, 2, 1]);
+    transform(s.filterer(even), reverse, [1, 2, 3, 4, 5], [1, 4, 3, 2, 5]);
     transform(
       [s.filterer(even), s.ALL],
-      _.constant(s.NONE),
+      constant(s.NONE),
       [1, 2, 3, 4, 5],
       [1, 3, 5]
     );
@@ -133,7 +129,7 @@ describe("transform", () => {
 
   test("complex", () => {
     transform([s.ALL, even], inc, [1, 2, 3], [1, 3, 3]);
-    transform([s.ALL, even], _.constant(s.NONE), [1, 2, 3], [1, 3]);
+    transform([s.ALL, even], constant(s.NONE), [1, 2, 3], [1, 3]);
   });
 });
 

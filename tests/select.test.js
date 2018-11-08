@@ -1,4 +1,3 @@
-const _ = require("lodash/fp");
 const s = require("../src/core");
 
 const select = (path, struct, expected) =>
@@ -70,8 +69,6 @@ describe("select", () => {
   });
 
   test("key", () => {
-    select("a", undefined, [undefined]);
-    select("a", [], [undefined]);
     select("a", { a: 1 }, [1]);
     select(["a", "b"], { a: { b: 1 } }, [1]);
     select([0], [1], [1]);
@@ -79,8 +76,8 @@ describe("select", () => {
   });
 
   test("pred", () => {
-    select([_.stubFalse], 1, []);
-    select([_.stubTrue], 1, [1]);
+    select(() => false, 1, []);
+    select(() => true, 1, [1]);
     select([v => v === 1], 1, [1]);
     select([v => v !== 1], 1, []);
   });
