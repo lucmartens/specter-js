@@ -73,7 +73,11 @@ console.log();
 console.log("Array concat");
 new Benchmark.Suite()
   .add("concat", () => arr.concat(arr))
-  .add("impl.concat", impl.concat(arr, arr))
+  .add("apply push", () => {
+    const r = arr.slice();
+    r.push(...arr);
+    return r;
+  })
   .on("cycle", report)
   .run();
 
@@ -133,21 +137,16 @@ new Benchmark.Suite()
   .on("cycle", report)
   .run();
 
+console.log();
+console.log("map object values");
 new Benchmark.Suite()
-  .add("entries", function() {
-    const acc = {};
-    for (const [k, v] of Object.entries(obj)) {
-      acc[k] = inc(v);
-    }
-    return acc;
-  })
-  .add("keys and lookup", function() {
-    const acc = {};
-    for (const k of Object.keys(obj)) {
-      acc[k] = obj[k];
-    }
-    return acc;
-  })
+  .add("reduce entries", () =>
+    Object.entries(obj).reduce((acc, [k, v]) => {
+      acc[k] = v;
+      return acc;
+    }, {})
+  )
+  .add("impl.mapValues", () => impl.mapValues(inc, obj))
   .on("cycle", report)
   .run();
 
@@ -155,13 +154,6 @@ console.log();
 console.log("map array");
 new Benchmark.Suite()
   .add("array.map", () => arr.map(inc))
-  .add("for loop", () => {
-    const acc = [];
-    for (let i = 0; i < arr.length; i++) {
-      acc.push(inc(arr[i]));
-    }
-    return acc;
-  })
   .add("iterable", () => {
     const acc = [];
     for (let v of arr) {
@@ -170,5 +162,6 @@ new Benchmark.Suite()
     return acc;
   })
   .add("Array.from", () => Array.from(arr, inc))
+  .add("impl.map", () => impl.map(inc, arr))
   .on("cycle", report)
   .run();
