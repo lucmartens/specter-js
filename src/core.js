@@ -1,12 +1,6 @@
-const _ = require("lodash/fp");
+const _ = require("./impl");
 
-_.mixin({
-  cons: (a, b) => _.concat([a], b),
-  conj: (b, a) => _.concat(b, [a]),
-  isNavigator: f => _.isFunction(f) && f.isNavigator
-});
-
-const NONE = Symbol("NONE");
+const NONE = _.NONE;
 module.exports.NONE = NONE;
 
 const navigator = m => {
@@ -16,12 +10,8 @@ const navigator = m => {
 };
 
 module.exports.ALL = navigator({
-  select: next => _.flatMap(next),
-  transform: next =>
-    _.reduce((acc, v) => {
-      const result = next(v);
-      return result === NONE ? acc : _.conj(acc, result);
-    }, [])
+  select: next => struct => _.flatMap(next, struct),
+  transform: next => struct => _.map(next, struct)
 });
 
 module.exports.MAP_VALS = navigator({
@@ -35,46 +25,30 @@ module.exports.MAP_KEYS = navigator({
 });
 
 module.exports.MAP_ENTRIES = navigator({
-  select: next => struct => _.flatMap(next, Object.entries(struct)),
-  transform: next => struct =>
-    _.reduce(
-      (acc, [k, v]) => {
-        const result = next([k, v]);
-        return { ...acc, [result[0]]: result[1] };
-      },
-      {},
-      Object.entries(struct)
-    )
+  select: next => struct => _.flatMap(next, _.entries(struct)),
+  transform: next => struct => _.mapEntries(next, struct)
 });
 
 module.exports.FIRST = navigator({
-  select: next => struct => (_.isEmpty(struct) ? [] : next(_.head(struct))),
-  transform: next => struct => {
-    if (_.isEmpty(struct)) {
-      return struct;
-    }
-    const result = next(_.get(0, struct));
-    return result === NONE ? _.pullAt(0, struct) : _.set(0, result, struct);
-  }
+  select: next => struct => (_.isEmpty(struct) ? [] : next(struct[0])),
+  transform: next => struct =>
+    _.isEmpty(struct) ? struct : _.updateArray(0, next, struct)
 });
 
 module.exports.LAST = navigator({
-  select: next => struct => (_.isEmpty(struct) ? [] : next(_.last(struct))),
-  transform: next => struct => {
-    if (_.isEmpty(struct)) {
-      return struct;
-    }
-    const idx = struct.length - 1;
-    const result = next(_.get(idx, struct));
-    return result === NONE ? _.pullAt(idx, struct) : _.set(idx, result, struct);
-  }
+  select: next => struct =>
+    _.isEmpty(struct) ? [] : next(struct[struct.length - 1]),
+  transform: next => struct =>
+    _.isEmpty(struct) ? struct : _.updateArray(struct.length - 1, next, struct)
 });
 
 module.exports.BEGINNING = navigator({
   select: next => struct => [],
   transform: next => struct => {
     const result = next([]);
-    return _.isArray(struct) ? _.concat(result, struct) : result;
+    return _.isArray(result)
+      ? _.concat(result, struct)
+      : _.cons(result, struct);
   }
 });
 
@@ -82,7 +56,7 @@ module.exports.END = navigator({
   select: next => struct => [],
   transform: next => struct => {
     const result = next([]);
-    return _.isArray(struct) ? _.concat(struct, result) : result;
+    return _.concat(struct, result);
   }
 });
 
@@ -104,9 +78,9 @@ module.exports.AFTER_ELEM = navigator({
 
 module.exports.key = key =>
   navigator({
-    select: next => struct => next(_.get(key, struct)),
+    select: next => struct => next(struct[key]),
     transform: next => struct => {
-      const result = next(_.get(key, struct));
+      const result = next(struct[key]);
       return result === NONE ? _.omit(key, struct) : _.set(key, result, struct);
     }
   });
@@ -143,7 +117,7 @@ module.exports.filterer = path => {
         _.reduce(
           (acc, v) => {
             const result = module.exports.compiledSelect(compiledPath, v);
-            return result.length ? [...acc, v] : acc;
+            return result.length ? _.conj(acc, v) : acc;
           },
           [],
           struct
@@ -180,19 +154,30 @@ module.exports.filterer = path => {
   });
 };
 
-const resolveNavigator = _.cond([
-  [_.isNavigator, _.identity],
-  [_.isString, module.exports.key],
-  [_.isNumber, module.exports.key],
-  [_.isFunction, module.exports.pred]
-]);
+const resolveNavigator = nav => {
+  const type = typeof nav;
+  if (type === "function" && nav.isNavigator) {
+    return nav;
+  }
+
+  switch (type) {
+    case "string":
+      return module.exports.key(nav);
+    case "number":
+      return module.exports.key(nav);
+    case "function":
+      return module.exports.pred(nav);
+  }
+};
 
 const compile = path => {
   let defer;
-  path = _.isArray(path) ? path : [path];
 
-  const compose = (nav, next) => resolveNavigator(nav)(next);
-  const compiled = _.reduceRight(compose, op => v => defer(v), path);
+  const compiled = _.reduceRight(
+    (acc, nav) => resolveNavigator(nav)(acc),
+    op => v => defer(v),
+    Array.isArray(path) ? path : [path]
+  );
 
   return (operation, lastFn, struct) => {
     defer = lastFn;
@@ -209,10 +194,10 @@ module.exports.compiledSelect = (compiledPath, struct) =>
   compiledPath("select", v => [v], struct);
 
 module.exports.selectOne = (path, struct) =>
-  compile(path)("select", _.identity, struct);
+  compile(path)("select", v => v, struct);
 
 module.exports.compiledSelectOne = (compiledPath, struct) =>
-  compiledPath("select", _.identity, struct);
+  compiledPath("select", v => v, struct);
 
 module.exports.transform = (path, update, struct) =>
   compile(path)("transform", update, struct);
@@ -221,7 +206,7 @@ module.exports.compiledTransform = (compiledPath, update, struct) =>
   compiledPath("transform", update, struct);
 
 module.exports.setval = (path, value, struct) =>
-  compile(path)("transform", _.constant(value), struct);
+  compile(path)("transform", () => value, struct);
 
 module.exports.compiledSetval = (compiledPath, value, struct) =>
-  compiledPath("transform", _.constant(value), struct);
+  compiledPath("transform", () => value, struct);

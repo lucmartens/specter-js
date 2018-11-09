@@ -14,9 +14,7 @@
     "build": "rollup -c",
     "bench": "node ./benchmark/transform.js"
   },
-  "dependencies": {
-    "lodash": "^4.17.11"
-  },
+  "dependencies": {},
   "devDependencies": {
     "benchmark": "^2.1.4",
     "jest": "^23.6.0",

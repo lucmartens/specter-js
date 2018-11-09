@@ -1,4 +1,3 @@
-const _ = require("lodash/fp");
 const s = require("../src/core");
 
 const select = (path, struct, expected) =>
@@ -14,7 +13,6 @@ describe("select", () => {
   });
 
   test("ALL", () => {
-    select(s.ALL, undefined, []);
     select(s.ALL, [], []);
     select(s.ALL, [1, 2], [1, 2]);
     select(s.ALL, [[1, 2]], [[1, 2]]);
@@ -22,13 +20,11 @@ describe("select", () => {
   });
 
   test("MAP_VALS", () => {
-    select(s.MAP_VALS, undefined, []);
     select(s.MAP_VALS, {}, []);
     select(s.MAP_VALS, { a: 1, b: 2 }, [1, 2]);
   });
 
   test("MAP_KEYS", () => {
-    select(s.MAP_KEYS, undefined, []);
     select(s.MAP_KEYS, {}, []);
     select(s.MAP_KEYS, { a: 1, b: 2 }, ["a", "b"]);
   });
@@ -73,8 +69,6 @@ describe("select", () => {
   });
 
   test("key", () => {
-    select("a", undefined, [undefined]);
-    select("a", [], [undefined]);
     select("a", { a: 1 }, [1]);
     select(["a", "b"], { a: { b: 1 } }, [1]);
     select([0], [1], [1]);
@@ -82,8 +76,8 @@ describe("select", () => {
   });
 
   test("pred", () => {
-    select([_.stubFalse], 1, []);
-    select([_.stubTrue], 1, [1]);
+    select(() => false, 1, []);
+    select(() => true, 1, [1]);
     select([v => v === 1], 1, [1]);
     select([v => v !== 1], 1, []);
   });
@@ -111,7 +105,6 @@ describe("select", () => {
   });
 
   test("complex", () => {
-    select([s.ALL, s.FIRST], undefined, []);
     select([s.ALL, s.FIRST], [[1, 2], [1, 2]], [1, 1]);
     select([s.ALL, "a"], [{ a: 1 }, { a: 1 }], [1, 1]);
     select([s.ALL, "a", v => v > 1], [{ a: 1 }, { a: 2 }], [2]);
