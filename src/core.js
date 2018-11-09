@@ -46,7 +46,9 @@ module.exports.BEGINNING = navigator({
   select: next => struct => [],
   transform: next => struct => {
     const result = next([]);
-    return _.isArray(result) ? _.concat(result, struct) : [result, ...struct];
+    return _.isArray(result)
+      ? _.concat(result, struct)
+      : _.cons(result, struct);
   }
 });
 
@@ -115,7 +117,7 @@ module.exports.filterer = path => {
         _.reduce(
           (acc, v) => {
             const result = module.exports.compiledSelect(compiledPath, v);
-            return result.length ? [...acc, v] : acc;
+            return result.length ? _.conj(acc, v) : acc;
           },
           [],
           struct
