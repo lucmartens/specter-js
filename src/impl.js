@@ -27,6 +27,93 @@ module.exports.flatMap = (fn, struct) => {
   return acc;
 };
 
+module.exports.concat = (a, b) => a.concat(b);
+
+module.exports.reduceRight = (fn, initial, struct) => {
+  let acc = initial;
+  for (let i = struct.length - 1; i >= 0; i--) {
+    acc = fn(acc, struct[i]);
+  }
+  return acc;
+};
+
+module.exports.reduce = (fn, initial, struct) => {
+  let acc = initial;
+  for (let i = 0; i < struct.length; i++) {
+    acc = fn(acc, struct[i]);
+  }
+  return acc;
+};
+
+module.exports.cons = (a, b) => [a].concat(b);
+
+module.exports.conj = (a, b) => {
+  const r = a.slice();
+  r.push(b);
+  return r;
+};
+
+module.exports.insertArray = (idx, value, struct) => {
+  const r = struct.slice(0, idx);
+  r.push(value, ...struct.slice(idx));
+  return r;
+};
+
+module.exports.updateArray = (idx, fn, struct) => {
+  const result = fn(struct[idx]);
+  if (result === NONE) {
+    const r = struct.slice(0, idx);
+    r.push(...struct.slice(idx + 1));
+    return r;
+  } else {
+    const r = struct.slice(0, idx);
+    r.push(result, ...struct.slice(idx + 1));
+    return r;
+  }
+};
+
+module.exports.isArray = Array.isArray;
+
+module.exports.isEmpty = struct => !struct || struct.length === 0;
+
+module.exports.omit = (keys, struct) => {
+  const acc = {};
+  const Objkeys = Object.keys(struct);
+  for (let i = 0; i < Objkeys.length; i++) {
+    const key = Objkeys[i];
+    if (!keys.includes(key)) {
+      acc[key] = struct[key];
+    }
+  }
+  return acc;
+};
+
+module.exports.pick = (keys, struct) => {
+  const acc = {};
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    acc[key] = struct[key];
+  }
+  return acc;
+};
+
+module.exports.merge = (a, b) => {
+  const acc = {};
+  const keysA = Object.keys(a);
+  for (let i = 0; i < keysA.length; i++) {
+    const key = keysA[i];
+    const value = a[key];
+    acc[key] = value;
+  }
+  const keysB = Object.keys(b);
+  for (let i = 0; i < keysB.length; i++) {
+    const key = keysB[i];
+    const value = b[key];
+    acc[key] = value;
+  }
+  return acc;
+};
+
 module.exports.mapValues = (fn, struct) => {
   const acc = {};
   const keys = Object.keys(struct);
@@ -69,94 +156,8 @@ module.exports.mapEntries = (fn, struct) => {
   return acc;
 };
 
-module.exports.cons = (a, b) => [a].concat(b);
-
-module.exports.conj = (a, b) => {
-  const r = a.slice();
-  r.push(b);
-  return r;
-};
-
-module.exports.insertArray = (idx, value, struct) => {
-  const r = struct.slice(0, idx);
-  r.push(value, ...struct.slice(idx));
-  return r;
-};
-
-module.exports.updateArray = (idx, fn, struct) => {
-  const result = fn(struct[idx]);
-  if (result === NONE) {
-    const r = struct.slice(0, idx);
-    r.push(...struct.slice(idx + 1));
-    return r;
-  } else {
-    const r = struct.slice(0, idx);
-    r.push(result, ...struct.slice(idx + 1));
-    return r;
-  }
-};
-
-module.exports.omit = (keys, struct) => {
-  const acc = {};
-  const Objkeys = Object.keys(struct);
-  for (let i = 0; i < Objkeys.length; i++) {
-    const key = Objkeys[i];
-    if (!keys.includes(key)) {
-      acc[key] = struct[key];
-    }
-  }
-  return acc;
-};
-
-module.exports.pick = (keys, struct) => {
-  const acc = {};
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    acc[key] = struct[key];
-  }
-  return acc;
-};
-
-module.exports.merge = (a, b) => {
-  const acc = {};
-  const keysA = Object.keys(a);
-  for (let i = 0; i < keysA.length; i++) {
-    const key = keysA[i];
-    const value = a[key];
-    acc[key] = value;
-  }
-  const keysB = Object.keys(b);
-  for (let i = 0; i < keysB.length; i++) {
-    const key = keysB[i];
-    const value = b[key];
-    acc[key] = value;
-  }
-  return acc;
-};
-
 module.exports.set = (key, value, struct) =>
   module.exports.merge(struct, { [key]: value });
-
-module.exports.concat = (a, b) => a.concat(b);
-
-module.exports.reduceRight = (fn, initial, struct) => {
-  let acc = initial;
-  for (let i = struct.length - 1; i >= 0; i--) {
-    acc = fn(acc, struct[i]);
-  }
-  return acc;
-};
-
-module.exports.reduce = (fn, initial, struct) => {
-  let acc = initial;
-  for (let i = 0; i < struct.length; i++) {
-    acc = fn(acc, struct[i]);
-  }
-  return acc;
-};
-
-module.exports.isArray = Array.isArray;
-module.exports.isEmpty = struct => !struct || struct.length === 0;
 
 module.exports.keys = Object.keys;
 

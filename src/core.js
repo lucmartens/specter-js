@@ -1,6 +1,6 @@
-const impl = require("./impl");
+const _ = require("./impl");
 
-const NONE = impl.NONE;
+const NONE = _.NONE;
 module.exports.NONE = NONE;
 
 const navigator = m => {
@@ -10,47 +10,43 @@ const navigator = m => {
 };
 
 module.exports.ALL = navigator({
-  select: next => struct => impl.flatMap(next, struct),
-  transform: next => struct => impl.map(next, struct)
+  select: next => struct => _.flatMap(next, struct),
+  transform: next => struct => _.map(next, struct)
 });
 
 module.exports.MAP_VALS = navigator({
-  select: next => struct => impl.flatMap(next, impl.values(struct)),
-  transform: next => struct => impl.mapValues(next, struct)
+  select: next => struct => _.flatMap(next, _.values(struct)),
+  transform: next => struct => _.mapValues(next, struct)
 });
 
 module.exports.MAP_KEYS = navigator({
-  select: next => struct => impl.flatMap(next, impl.keys(struct)),
-  transform: next => struct => impl.mapKeys(next, struct)
+  select: next => struct => _.flatMap(next, _.keys(struct)),
+  transform: next => struct => _.mapKeys(next, struct)
 });
 
 module.exports.MAP_ENTRIES = navigator({
-  select: next => struct => impl.flatMap(next, impl.entries(struct)),
-  transform: next => struct => impl.mapEntries(next, struct)
+  select: next => struct => _.flatMap(next, _.entries(struct)),
+  transform: next => struct => _.mapEntries(next, struct)
 });
 
 module.exports.FIRST = navigator({
-  select: next => struct => (impl.isEmpty(struct) ? [] : next(struct[0])),
+  select: next => struct => (_.isEmpty(struct) ? [] : next(struct[0])),
   transform: next => struct =>
-    impl.isEmpty(struct) ? struct : impl.updateArray(0, next, struct)
+    _.isEmpty(struct) ? struct : _.updateArray(0, next, struct)
 });
 
 module.exports.LAST = navigator({
   select: next => struct =>
-    impl.isEmpty(struct) ? [] : next(struct[struct.length - 1]),
+    _.isEmpty(struct) ? [] : next(struct[struct.length - 1]),
   transform: next => struct =>
-    impl.isEmpty(struct)
-      ? struct
-      : impl.updateArray(struct.length - 1, next, struct)
+    _.isEmpty(struct) ? struct : _.updateArray(struct.length - 1, next, struct)
 });
 
 module.exports.BEGINNING = navigator({
   select: next => struct => [],
   transform: next => struct => {
     const result = next([]);
-    return impl.isArray(result)
-      ? impl.concat(result, struct)
-      : [result, ...struct];
+    return _.isArray(result) ? _.concat(result, struct) : [result, ...struct];
   }
 });
 
@@ -58,7 +54,7 @@ module.exports.END = navigator({
   select: next => struct => [],
   transform: next => struct => {
     const result = next([]);
-    return impl.concat(struct, result);
+    return _.concat(struct, result);
   }
 });
 
@@ -66,7 +62,7 @@ module.exports.BEFORE_ELEM = navigator({
   select: next => struct => NONE,
   transform: next => struct => {
     const result = next(NONE);
-    return result === NONE ? struct : impl.cons(result, struct);
+    return result === NONE ? struct : _.cons(result, struct);
   }
 });
 
@@ -74,7 +70,7 @@ module.exports.AFTER_ELEM = navigator({
   select: next => struct => NONE,
   transform: next => struct => {
     const result = next(NONE);
-    return result === NONE ? struct : impl.conj(struct, result);
+    return result === NONE ? struct : _.conj(struct, result);
   }
 });
 
@@ -83,9 +79,7 @@ module.exports.key = key =>
     select: next => struct => next(struct[key]),
     transform: next => struct => {
       const result = next(struct[key]);
-      return result === NONE
-        ? impl.omit(key, struct)
-        : impl.set(key, result, struct);
+      return result === NONE ? _.omit(key, struct) : _.set(key, result, struct);
     }
   });
 
@@ -103,9 +97,8 @@ module.exports.parser = (parse, unparse) =>
 
 module.exports.submap = keys =>
   navigator({
-    select: next => struct => next(impl.pick(keys, struct)),
-    transform: next => struct =>
-      impl.merge(struct, next(impl.pick(keys, struct)))
+    select: next => struct => next(_.pick(keys, struct)),
+    transform: next => struct => _.merge(struct, next(_.pick(keys, struct)))
   });
 
 module.exports.view = fn =>
@@ -119,7 +112,7 @@ module.exports.filterer = path => {
   return navigator({
     select: next => struct =>
       next(
-        impl.reduce(
+        _.reduce(
           (acc, v) => {
             const result = module.exports.compiledSelect(compiledPath, v);
             return result.length ? [...acc, v] : acc;
@@ -178,7 +171,7 @@ const resolveNavigator = nav => {
 const compile = path => {
   let defer;
 
-  const compiled = impl.reduceRight(
+  const compiled = _.reduceRight(
     (acc, nav) => resolveNavigator(nav)(acc),
     op => v => defer(v),
     Array.isArray(path) ? path : [path]
