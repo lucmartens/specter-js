@@ -85,6 +85,11 @@ describe("transform", () => {
     transform(["a"], constant(s.NONE), { a: 1, b: 2 }, { b: 2 });
   });
 
+  test("nth", () => {
+    transform(0, inc, [0, 1, 2], [1, 1, 2]);
+    transform([0, 0], inc, [[0], 1, 2], [[1], 1, 2]);
+  });
+
   test("pred", () => {
     transform([even], inc, 1, 1);
     transform([even], inc, 2, 3);

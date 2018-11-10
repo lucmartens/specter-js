@@ -71,7 +71,11 @@ describe("select", () => {
   test("key", () => {
     select("a", { a: 1 }, [1]);
     select(["a", "b"], { a: { b: 1 } }, [1]);
-    select([0], [1], [1]);
+  });
+
+  test("nth", () => {
+    select(0, [0, 1, 2], [0]);
+    select([1, 1], [0, [1, 2]], [2]);
     select([1], [1], [undefined]);
   });
 
@@ -101,7 +105,6 @@ describe("select", () => {
   test("filterer", () => {
     select(s.filterer(even), [1, 2, 3, 4], [[2, 4]]);
     select([s.filterer(even), s.ALL], [1, 2, 3, 4], [2, 4]);
-    // select(s.filterer([s.ALL, even]), [[1, 2, 3, 4]], [[[2, 4]]]);
   });
 
   test("complex", () => {
