@@ -56,7 +56,9 @@ module.exports.END = navigator({
   select: next => struct => [],
   transform: next => struct => {
     const result = next([]);
-    return _.concat(struct, result);
+    return _.isArray(result)
+      ? _.concat(struct, result)
+      : _.conj(struct, result);
   }
 });
 
@@ -83,6 +85,12 @@ module.exports.key = key =>
       const result = next(struct[key]);
       return result === NONE ? _.omit(key, struct) : _.set(key, result, struct);
     }
+  });
+
+module.exports.nth = index =>
+  navigator({
+    select: next => struct => next(struct[index]),
+    transform: next => struct => _.updateArray(index, next, struct)
   });
 
 module.exports.pred = pred =>
@@ -164,7 +172,7 @@ const resolveNavigator = nav => {
     case "string":
       return module.exports.key(nav);
     case "number":
-      return module.exports.key(nav);
+      return module.exports.nth(nav);
     case "function":
       return module.exports.pred(nav);
   }
