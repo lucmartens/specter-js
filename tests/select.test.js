@@ -1,4 +1,4 @@
-const s = require("../src/core");
+const s = require("../src");
 
 const select = (path, struct, expected) =>
   expect(s.select(path, struct)).toEqual(expected);
@@ -17,6 +17,12 @@ describe("select", () => {
     select(s.ALL, [1, 2], [1, 2]);
     select(s.ALL, [[1, 2]], [[1, 2]]);
     select([s.ALL, s.ALL], [[1, 2]], [1, 2]);
+
+    select(s.ALL, {}, []);
+    select(s.ALL, { a: 1 }, [["a", 1]]);
+
+    select(s.ALL, "", []);
+    select(s.ALL, "abc", ["a", "b", "c"]);
   });
 
   test("MAP_VALS", () => {
@@ -103,12 +109,18 @@ describe("select", () => {
   });
 
   test("filterer", () => {
-    select(s.filterer(even), [1, 2, 3, 4], [[2, 4]]);
-    select([s.filterer(even), s.ALL], [1, 2, 3, 4], [2, 4]);
+    select(s.filterer(even), [1, 2, 3, 4], [[[2, 4]]]);
+    select([s.filterer(even), s.ALL], [1, 2, 3, 4], [[2, 4]]);
   });
 
   test("complex", () => {
     select([s.ALL, s.FIRST], [[1, 2], [1, 2]], [1, 1]);
+    select([s.ALL, s.compile([s.FIRST])], [[1, 2], [1, 2]], [1, 1]);
+    select(
+      [s.ALL, s.compile(s.FIRST), s.LAST],
+      [[[1, 2], ["a", "b"]], [[3, 4], ["c", "d"]]],
+      [2, 4]
+    );
     select([s.ALL, "a"], [{ a: 1 }, { a: 1 }], [1, 1]);
     select([s.ALL, "a", v => v > 1], [{ a: 1 }, { a: 2 }], [2]);
   });
@@ -119,19 +131,11 @@ describe("select variants", () => {
   const path = [s.ALL, "a", v => v > 1];
   const compiledPath = s.compile(path);
 
-  test("select", () => {
-    expect(s.select(path, data)).toEqual([2]);
-  });
-
   test("compiled select", () => {
-    expect(s.compiledSelect(compiledPath, data)).toEqual([2]);
+    expect(s.select(compiledPath, data)).toEqual([2]);
   });
 
   test("select-one", () => {
     expect(s.selectOne(path, data)).toEqual([2]);
-  });
-
-  test("compiled select-one", () => {
-    expect(s.compiledSelectOne(compiledPath, data)).toEqual([2]);
   });
 });

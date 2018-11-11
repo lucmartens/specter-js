@@ -1,4 +1,4 @@
-const s = require("../src/core");
+const s = require("../src");
 
 const transform = (path, fn, struct, expected) =>
   expect(s.transform(path, fn, struct)).toEqual(expected);
@@ -16,11 +16,25 @@ describe("transform", () => {
     transform([], identity, [], []);
   });
 
-  test("ALL", () => {
-    transform(s.ALL, identity, [1], [1]);
+  test("ALL - array", () => {
     transform(s.ALL, inc, [1, 2], [2, 3]);
     transform([s.ALL, s.ALL], inc, [[1, 2], [3, 4]], [[2, 3], [4, 5]]);
     transform(s.ALL, constant(s.NONE), [1, 2, 3], []);
+  });
+
+  test("ALL - object", () => {
+    transform(
+      s.ALL,
+      v => [v[0] + "x", inc(v[1])],
+      { a: 1, b: 2 },
+      { ax: 2, bx: 3 }
+    );
+    transform(s.ALL, constant(s.NONE), { a: 1, b: 2 }, {});
+  });
+
+  test("ALL - string", () => {
+    transform(s.ALL, inc, "abc", "a1b1c1");
+    transform(s.ALL, constant(s.NONE), "abc", "");
   });
 
   test("MAP_VALS", () => {
@@ -116,7 +130,6 @@ describe("transform", () => {
   });
 
   test("filterer", () => {
-    expect(reverse([1, 2, 3])).toEqual([3, 2, 1]);
     transform(s.filterer(even), reverse, [1, 2, 3, 4, 5], [1, 4, 3, 2, 5]);
     transform(
       [s.filterer(even), s.ALL],
@@ -130,6 +143,23 @@ describe("transform", () => {
       [1, 2, 3, 4, 5, 6, 7, 8],
       [1, 2, 3, 4, 5, 6, 8, 8]
     );
+  });
+
+  test("subselect", () => {
+    const r = s.select(
+      [s.subselect([s.ALL, "a", even])],
+      [{ a: 1 }, { a: 2 }, { a: 4 }]
+    );
+
+    expect(r).toEqual([[2, 4]]);
+
+    const r2 = s.transform([s.subselect([s.ALL, "a", even])], reverse, [
+      { a: 1 },
+      { a: 2 },
+      { a: 4 }
+    ]);
+
+    expect(r2).toEqual([{ a: 1 }, { a: 4 }, { a: 2 }]);
   });
 
   test("complex", () => {
@@ -146,17 +176,11 @@ describe("transform variants", () => {
 
   test("transform", () => {
     expect(s.transform(path, inc, data)).toEqual(expected);
-  });
-
-  test("compiled transform", () => {
-    expect(s.compiledTransform(compiledPath, inc, data)).toEqual(expected);
+    expect(s.transform(compiledPath, inc, data)).toEqual(expected);
   });
 
   test("setval", () => {
     expect(s.setval(path, 3, data)).toEqual(expected);
-  });
-
-  test("compiled setval", () => {
-    expect(s.compiledSetval(compiledPath, 3, data)).toEqual(expected);
+    expect(s.setval(compiledPath, 3, data)).toEqual(expected);
   });
 });
