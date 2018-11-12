@@ -14,47 +14,62 @@ describe("transform", () => {
   test("Without navigators", () => {
     transform([], identity, 1, 1);
     transform([], identity, [], []);
+    transform([], identity, {}, {});
+    transform([], identity, undefined, undefined);
   });
 
-  test("ALL - array", () => {
-    transform(s.ALL, inc, [1, 2], [2, 3]);
-    transform([s.ALL, s.ALL], inc, [[1, 2], [3, 4]], [[2, 3], [4, 5]]);
-    transform(s.ALL, constant(s.NONE), [1, 2, 3], []);
+  describe("ALL", () => {
+    describe("array", () => {
+      test("to value", () => transform(s.ALL, inc, [1, 2], [2, 3]));
+      test("to NONE", () => transform(s.ALL, constant(s.NONE), [1, 2, 3], []));
+    });
+    describe("object", () => {
+      test("to value", () => {
+        const update = v => [v[0] + "x", inc(v[1])];
+        transform(s.ALL, update, { a: 1, b: 2 }, { ax: 2, bx: 3 });
+      });
+      test("to NONE", () =>
+        transform(s.ALL, constant(s.NONE), { a: 1, b: 2 }, {}));
+    });
+    describe("string", () => {
+      test("to value", () => transform(s.ALL, v => v + "x", "abc", "axbxcx"));
+      test("to NONE", () => transform(s.ALL, constant(s.NONE), "abc", ""));
+    });
+    test("calls next nav", () =>
+      transform([s.ALL, s.ALL], inc, [[1, 2], [3, 4]], [[2, 3], [4, 5]]));
   });
 
-  test("ALL - object", () => {
-    transform(
-      s.ALL,
-      v => [v[0] + "x", inc(v[1])],
-      { a: 1, b: 2 },
-      { ax: 2, bx: 3 }
-    );
-    transform(s.ALL, constant(s.NONE), { a: 1, b: 2 }, {});
+  describe("MAP_VALS", () => {
+    describe("array", () => {
+      test("to value", () => transform(s.MAP_VALS, inc, [1, 2], [2, 3]));
+      test("to NONE", () =>
+        transform(s.MAP_VALS, constant(s.NONE), [1, 2], []));
+    });
+    describe("object", () => {
+      test("to value", () =>
+        transform(s.MAP_VALS, inc, { a: 1, b: 2 }, { a: 2, b: 3 }));
+      test("to NONE", () =>
+        transform(s.MAP_VALS, constant(s.NONE), { a: 1, b: 2 }, {}));
+    });
+    test("calls next nav", () =>
+      transform(
+        [s.MAP_VALS, s.MAP_VALS],
+        inc,
+        [[1, 2], [3, 4]],
+        [[2, 3], [4, 5]]
+      ));
   });
 
-  test("ALL - string", () => {
-    transform(s.ALL, inc, "abc", "a1b1c1");
-    transform(s.ALL, constant(s.NONE), "abc", "");
-  });
+  describe("MAP_KEYS", () => {
+    describe("object", () => {
+      test("to value", () =>
+        transform(s.MAP_KEYS, v => v + "b", { a: "a" }, { ab: "a" }));
+      test("to NONE", () =>
+        transform(s.MAP_KEYS, constant(s.NONE), { a: 1, b: 2 }, {}));
+    });
 
-  test("MAP_VALS", () => {
-    transform(s.MAP_VALS, inc, {}, {});
-    transform(s.MAP_VALS, inc, { a: 1 }, { a: 2 });
-  });
-
-  test("MAP_KEYS", () => {
-    transform(s.MAP_KEYS, inc, {}, {});
-    transform(s.MAP_KEYS, v => v + "b", { a: "a" }, { ab: "a" });
-  });
-
-  test("MAP_ENTRIES", () => {
-    transform(s.MAP_ENTRIES, identity, {}, {});
-    transform(
-      s.MAP_ENTRIES,
-      ([k, v]) => [k + "b", v + "b"],
-      { a: "a" },
-      { ab: "ab" }
-    );
+    test("calls next nav", () =>
+      transform([s.MAP_KEYS, s.ALL], v => v + "x", { ab: "a" }, { axbx: "a" }));
   });
 
   test("FIRST", () => {
@@ -165,6 +180,16 @@ describe("transform", () => {
   test("complex", () => {
     transform([s.ALL, even], inc, [1, 2, 3], [1, 3, 3]);
     transform([s.ALL, even], constant(s.NONE), [1, 2, 3], [1, 3]);
+  });
+
+  test("branch", () => {
+    transform([s.branch(0, 1)], inc, [1, 2, 3], [2, 3, 3]);
+    transform(
+      s.branch("a", "b"),
+      inc,
+      { a: 1, b: 2, c: 3 },
+      { a: 2, b: 3, c: 3 }
+    );
   });
 });
 

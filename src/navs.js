@@ -21,6 +21,20 @@ const navigator = definition => {
  */
 const isNavigator = nav => typeof nav === "function" && nav[NAVIGATOR];
 
+const resolveNavigator = nav => {
+  if (isNavigator(nav)) {
+    return nav;
+  }
+  switch (typeof nav) {
+    case "string":
+      return keypath(nav);
+    case "number":
+      return nthpath(nav);
+    case "function":
+      return pred(nav);
+  }
+};
+
 /**
  * Navigate to every element in a collection. Can transform to NONE to remove
  * elements. Can navigate to elements in an array, entries in an object, or
@@ -29,8 +43,12 @@ const isNavigator = nav => typeof nav === "function" && nav[NAVIGATOR];
 const ALL = navigator({
   select: next => struct =>
     _.flatMap(next, _.isObject(struct) ? _.entries(struct) : struct),
-  transform: next => struct =>
-    _.isObject(struct) ? _.mapEntries(next, struct) : _.map(next, struct)
+  transform: next => struct => {
+    console.log("ALL", struct);
+    return _.isObject(struct)
+      ? _.mapEntries(next, struct)
+      : _.map(next, struct);
+  }
 });
 
 /**
@@ -38,8 +56,10 @@ const ALL = navigator({
  * entries.
  */
 const MAP_VALS = navigator({
-  select: next => struct => _.flatMap(next, _.values(struct)),
-  transform: next => struct => _.mapValues(next, struct)
+  select: next => struct =>
+    _.flatMap(next, _.isObject(struct) ? _.values(struct) : struct),
+  transform: next => struct =>
+    _.isObject(struct) ? _.mapValues(next, struct) : _.map(next, struct)
 });
 
 /**
@@ -81,6 +101,12 @@ const LAST = navigator({
 
   transform: next => struct =>
     _.isEmpty(struct) ? struct : _.updateArray(struct.length - 1, next, struct)
+});
+
+const TAIL = navigator({
+  select: next => struct => next(struct.slice(1)),
+  transform: next => struct =>
+    _.concat(struct.slice(0, 1), next(struct.slice(1)))
 });
 
 /**
@@ -170,16 +196,6 @@ const view = fn =>
     transform: next => struct => next(fn(struct))
   });
 
-const filterer = path => {
-  path = core.compile(path);
-  return navigator({
-    select: next => struct =>
-      next(core.select(subselect([ALL, isSelected(path)]), struct)),
-    transform: next => struct =>
-      core.transform(subselect([ALL, isSelected(path)]), next, struct)
-  });
-};
-
 const isSelected = path => {
   path = core.compile(path);
   return navigator({
@@ -201,15 +217,56 @@ const subselect = path => {
   });
 };
 
+const filterer = path => {
+  path = core.compile(path);
+  return navigator({
+    select: next => struct =>
+      next(core.select(subselect([ALL, isSelected(path)]), struct)),
+    transform: next => struct =>
+      core.transform(subselect([ALL, isSelected(path)]), next, struct)
+  });
+};
+
+const branch = (...paths) => {
+  // paths = _.map(core.compile, paths);
+  return navigator({
+    select: next => struct =>
+      next(_.flatMap(path => core.select(path, struct), paths)),
+    transform: next => struct => {
+      return _.reduce(
+        (acc, path) => core.transform(path, v => next([v]), acc),
+        struct,
+        paths
+      );
+    }
+  });
+};
+
+const regex = pattern =>
+  navigator({
+    select: next => struct => {
+      const match = struct.match(pattern);
+      return match ? _.flatMap(next, match) : [];
+    },
+    transform: next => struct => {
+      console.log("regex", struct);
+      const replaced = struct.replace(pattern, next);
+      console.log("result", replaced);
+      return replaced;
+    }
+  });
+
 module.exports = {
   navigator,
   isNavigator,
+  resolveNavigator,
   ALL,
   MAP_VALS,
   MAP_KEYS,
   MAP_ENTRIES,
   FIRST,
   LAST,
+  TAIL,
   BEGINNING,
   END,
   BEFORE_ELEM,
@@ -222,5 +279,7 @@ module.exports = {
   view,
   filterer,
   isSelected,
-  subselect
+  subselect,
+  branch,
+  regex
 };

@@ -1,24 +1,10 @@
 const _ = require("./impl");
 const navs = require("./navs");
 
-const COMPILED = Symbol("compiled");
+const NONE = _.NONE;
+const COMPILED = Symbol("COMPILED");
 
 const isCompiled = obj => typeof obj === "function" && obj[COMPILED];
-
-const resolveNavigator = nav => {
-  if (navs.isNavigator(nav)) {
-    return nav;
-  }
-
-  switch (typeof nav) {
-    case "string":
-      return navs.keypath(nav);
-    case "number":
-      return navs.nthpath(nav);
-    case "function":
-      return navs.pred(nav);
-  }
-};
 
 const compile = path => {
   if (isCompiled(path)) {
@@ -31,7 +17,7 @@ const compile = path => {
   const reducer = (acc, nav) => {
     return isCompiled(nav)
       ? op => struct => nav(op, acc(op), struct)
-      : resolveNavigator(nav)(acc);
+      : navs.resolveNavigator(nav)(acc);
   };
 
   const compiled = _.reduceRight(reducer, op => defer, path);
@@ -45,16 +31,20 @@ const compile = path => {
   return fn;
 };
 
-module.exports.compile = compile;
+const select = (path, struct) => compile(path)("select", v => [v], struct);
 
-module.exports.select = (path, struct) =>
-  compile(path)("select", v => [v], struct);
+const selectOne = (path, struct) => compile(path)("select", v => v, struct);
 
-module.exports.selectOne = (path, struct) =>
-  compile(path)("select", v => v, struct);
-
-module.exports.transform = (path, update, struct) =>
+const transform = (path, update, struct) =>
   compile(path)("transform", update, struct);
 
-module.exports.setval = (path, value, struct) =>
+const setval = (path, value, struct) =>
   compile(path)("transform", () => value, struct);
+
+module.exports = {
+  compile,
+  select,
+  selectOne,
+  transform,
+  setval
+};

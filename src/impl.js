@@ -122,7 +122,9 @@ module.exports.isEmpty = struct => !struct || struct.length === 0;
  * Return whether a value is an object.
  */
 module.exports.isObject = struct =>
-  typeof struct === "object" && struct.constructor === Object;
+  typeof struct === "object" &&
+  struct !== null &&
+  struct.constructor === Object;
 
 /**
  * Omit collection of keys from an object.

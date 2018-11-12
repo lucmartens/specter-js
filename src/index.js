@@ -1,9 +1,5 @@
-const core = require("./core");
 const navs = require("./navs");
+const core = require("./core");
 const impl = require("./impl");
 
-module.exports = {
-  ...core,
-  ...navs,
-  NONE: impl.NONE
-};
+module.exports = Object.assign({}, core, navs, { NONE: impl.NONE });
