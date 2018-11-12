@@ -1,4 +1,4 @@
-const s = require("../src/core");
+const s = require("../src");
 
 const transform = (path, fn, struct, expected) =>
   expect(s.transform(path, fn, struct)).toEqual(expected);
@@ -14,33 +14,62 @@ describe("transform", () => {
   test("Without navigators", () => {
     transform([], identity, 1, 1);
     transform([], identity, [], []);
+    transform([], identity, {}, {});
+    transform([], identity, undefined, undefined);
   });
 
-  test("ALL", () => {
-    transform(s.ALL, identity, [1], [1]);
-    transform(s.ALL, inc, [1, 2], [2, 3]);
-    transform([s.ALL, s.ALL], inc, [[1, 2], [3, 4]], [[2, 3], [4, 5]]);
-    transform(s.ALL, constant(s.NONE), [1, 2, 3], []);
+  describe("ALL", () => {
+    describe("array", () => {
+      test("to value", () => transform(s.ALL, inc, [1, 2], [2, 3]));
+      test("to NONE", () => transform(s.ALL, constant(s.NONE), [1, 2, 3], []));
+    });
+    describe("object", () => {
+      test("to value", () => {
+        const update = v => [v[0] + "x", inc(v[1])];
+        transform(s.ALL, update, { a: 1, b: 2 }, { ax: 2, bx: 3 });
+      });
+      test("to NONE", () =>
+        transform(s.ALL, constant(s.NONE), { a: 1, b: 2 }, {}));
+    });
+    describe("string", () => {
+      test("to value", () => transform(s.ALL, v => v + "x", "abc", "axbxcx"));
+      test("to NONE", () => transform(s.ALL, constant(s.NONE), "abc", ""));
+    });
+    test("calls next nav", () =>
+      transform([s.ALL, s.ALL], inc, [[1, 2], [3, 4]], [[2, 3], [4, 5]]));
   });
 
-  test("MAP_VALS", () => {
-    transform(s.MAP_VALS, inc, {}, {});
-    transform(s.MAP_VALS, inc, { a: 1 }, { a: 2 });
+  describe("MAP_VALS", () => {
+    describe("array", () => {
+      test("to value", () => transform(s.MAP_VALS, inc, [1, 2], [2, 3]));
+      test("to NONE", () =>
+        transform(s.MAP_VALS, constant(s.NONE), [1, 2], []));
+    });
+    describe("object", () => {
+      test("to value", () =>
+        transform(s.MAP_VALS, inc, { a: 1, b: 2 }, { a: 2, b: 3 }));
+      test("to NONE", () =>
+        transform(s.MAP_VALS, constant(s.NONE), { a: 1, b: 2 }, {}));
+    });
+    test("calls next nav", () =>
+      transform(
+        [s.MAP_VALS, s.MAP_VALS],
+        inc,
+        [[1, 2], [3, 4]],
+        [[2, 3], [4, 5]]
+      ));
   });
 
-  test("MAP_KEYS", () => {
-    transform(s.MAP_KEYS, inc, {}, {});
-    transform(s.MAP_KEYS, v => v + "b", { a: "a" }, { ab: "a" });
-  });
+  describe("MAP_KEYS", () => {
+    describe("object", () => {
+      test("to value", () =>
+        transform(s.MAP_KEYS, v => v + "b", { a: "a" }, { ab: "a" }));
+      test("to NONE", () =>
+        transform(s.MAP_KEYS, constant(s.NONE), { a: 1, b: 2 }, {}));
+    });
 
-  test("MAP_ENTRIES", () => {
-    transform(s.MAP_ENTRIES, identity, {}, {});
-    transform(
-      s.MAP_ENTRIES,
-      ([k, v]) => [k + "b", v + "b"],
-      { a: "a" },
-      { ab: "ab" }
-    );
+    test("calls next nav", () =>
+      transform([s.MAP_KEYS, s.ALL], v => v + "x", { ab: "a" }, { axbx: "a" }));
   });
 
   test("FIRST", () => {
@@ -116,7 +145,6 @@ describe("transform", () => {
   });
 
   test("filterer", () => {
-    expect(reverse([1, 2, 3])).toEqual([3, 2, 1]);
     transform(s.filterer(even), reverse, [1, 2, 3, 4, 5], [1, 4, 3, 2, 5]);
     transform(
       [s.filterer(even), s.ALL],
@@ -132,9 +160,36 @@ describe("transform", () => {
     );
   });
 
+  test("subselect", () => {
+    const r = s.select(
+      [s.subselect([s.ALL, "a", even])],
+      [{ a: 1 }, { a: 2 }, { a: 4 }]
+    );
+
+    expect(r).toEqual([[2, 4]]);
+
+    const r2 = s.transform([s.subselect([s.ALL, "a", even])], reverse, [
+      { a: 1 },
+      { a: 2 },
+      { a: 4 }
+    ]);
+
+    expect(r2).toEqual([{ a: 1 }, { a: 4 }, { a: 2 }]);
+  });
+
   test("complex", () => {
     transform([s.ALL, even], inc, [1, 2, 3], [1, 3, 3]);
     transform([s.ALL, even], constant(s.NONE), [1, 2, 3], [1, 3]);
+  });
+
+  test("branch", () => {
+    transform([s.branch(0, 1)], inc, [1, 2, 3], [2, 3, 3]);
+    transform(
+      s.branch("a", "b"),
+      inc,
+      { a: 1, b: 2, c: 3 },
+      { a: 2, b: 3, c: 3 }
+    );
   });
 });
 
@@ -146,17 +201,11 @@ describe("transform variants", () => {
 
   test("transform", () => {
     expect(s.transform(path, inc, data)).toEqual(expected);
-  });
-
-  test("compiled transform", () => {
-    expect(s.compiledTransform(compiledPath, inc, data)).toEqual(expected);
+    expect(s.transform(compiledPath, inc, data)).toEqual(expected);
   });
 
   test("setval", () => {
     expect(s.setval(path, 3, data)).toEqual(expected);
-  });
-
-  test("compiled setval", () => {
-    expect(s.compiledSetval(compiledPath, 3, data)).toEqual(expected);
+    expect(s.setval(compiledPath, 3, data)).toEqual(expected);
   });
 });
