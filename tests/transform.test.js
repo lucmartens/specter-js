@@ -17,30 +17,25 @@ describe("transform", () => {
   });
 
   test("ALL", () => {
-    transform(s.ALL, identity, [1], [1]);
+    transform(s.ALL, inc, [], []);
+    transform(s.ALL, inc, {}, {});
     transform(s.ALL, inc, [1, 2], [2, 3]);
+    transform(s.ALL, constant(s.NONE), [1, 2], []);
+    transform(s.ALL, constant(s.NONE), { a: 1 }, {});
+    transform(s.ALL, v => [v[0] + "x", inc(v[1])], { a: 1 }, { ax: 2 });
     transform([s.ALL, s.ALL], inc, [[1, 2], [3, 4]], [[2, 3], [4, 5]]);
-    transform(s.ALL, constant(s.NONE), [1, 2, 3], []);
   });
 
   test("MAP_VALS", () => {
     transform(s.MAP_VALS, inc, {}, {});
     transform(s.MAP_VALS, inc, { a: 1 }, { a: 2 });
+    transform(s.MAP_VALS, constant(s.NONE), { a: 1 }, {});
   });
 
   test("MAP_KEYS", () => {
     transform(s.MAP_KEYS, inc, {}, {});
     transform(s.MAP_KEYS, v => v + "b", { a: "a" }, { ab: "a" });
-  });
-
-  test("MAP_ENTRIES", () => {
-    transform(s.MAP_ENTRIES, identity, {}, {});
-    transform(
-      s.MAP_ENTRIES,
-      ([k, v]) => [k + "b", v + "b"],
-      { a: "a" },
-      { ab: "ab" }
-    );
+    transform(s.MAP_KEYS, constant(s.NONE), { a: 1 }, {});
   });
 
   test("FIRST", () => {

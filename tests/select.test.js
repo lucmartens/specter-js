@@ -14,8 +14,10 @@ describe("select", () => {
 
   test("ALL", () => {
     select(s.ALL, [], []);
+    select(s.ALL, {}, []);
     select(s.ALL, [1, 2], [1, 2]);
     select(s.ALL, [[1, 2]], [[1, 2]]);
+    select(s.ALL, { a: 1 }, [["a", 1]]);
     select([s.ALL, s.ALL], [[1, 2]], [1, 2]);
   });
 
@@ -27,11 +29,6 @@ describe("select", () => {
   test("MAP_KEYS", () => {
     select(s.MAP_KEYS, {}, []);
     select(s.MAP_KEYS, { a: 1, b: 2 }, ["a", "b"]);
-  });
-
-  test("MAP_ENTRIES", () => {
-    select(s.MAP_ENTRIES, {}, []);
-    select(s.MAP_ENTRIES, { a: 1, b: 2 }, [["a", 1], ["b", 2]]);
   });
 
   test("FIRST", () => {
