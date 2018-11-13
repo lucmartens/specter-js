@@ -1,32 +1,74 @@
 const _ = require("./impl");
 
 const NONE = _.NONE;
+const COMPILED = Symbol("COMPILED");
+const NAVIGATOR = Symbol("NAVIGATOR");
 module.exports.NONE = NONE;
 
 const navigator = m => {
   const fn = next => operation => m[operation](next(operation));
-  fn.isNavigator = true;
+  fn[NAVIGATOR] = true;
   return fn;
 };
 
+const resolveNavigator = nav => {
+  const type = typeof nav;
+  if (type === "function" && nav[NAVIGATOR]) {
+    return nav;
+  }
+
+  switch (type) {
+    case "string":
+      return module.exports.key(nav);
+    case "number":
+      return module.exports.nth(nav);
+    case "function":
+      return module.exports.pred(nav);
+  }
+};
+
+const compile = path => {
+  let defer;
+
+  const compiled = _.reduceRight(
+    (acc, nav) => resolveNavigator(nav)(acc),
+    op => v => defer(v),
+    Array.isArray(path) ? path : [path]
+  );
+
+  return (operation, lastFn, struct) => {
+    defer = lastFn;
+    return compiled(operation)(struct);
+  };
+};
+
+/**
+ * Navigate to every element in an array or key/value pair in an object.
+ * Can transform to `NONE` to remove elements.
+ */
 module.exports.ALL = navigator({
-  select: next => struct => _.flatMap(next, struct),
-  transform: next => struct => _.map(next, struct)
+  select: next => struct =>
+    _.flatMap(next, _.isObject(struct) ? _.entries(struct) : struct),
+  transform: next => struct =>
+    _.isObject(struct) ? _.mapEntries(next, struct) : _.map(next, struct)
 });
 
+/**
+ * Navigate to every value in an object.
+ * Can transform to `NONE` to remove entries.
+ */
 module.exports.MAP_VALS = navigator({
   select: next => struct => _.flatMap(next, _.values(struct)),
   transform: next => struct => _.mapValues(next, struct)
 });
 
+/**
+ * Navigate to every key in an object.
+ * Can transform to `NONE` to remove entries.
+ */
 module.exports.MAP_KEYS = navigator({
   select: next => struct => _.flatMap(next, _.keys(struct)),
   transform: next => struct => _.mapKeys(next, struct)
-});
-
-module.exports.MAP_ENTRIES = navigator({
-  select: next => struct => _.flatMap(next, _.entries(struct)),
-  transform: next => struct => _.mapEntries(next, struct)
 });
 
 module.exports.FIRST = navigator({
@@ -160,37 +202,6 @@ module.exports.filterer = path => {
       return result;
     }
   });
-};
-
-const resolveNavigator = nav => {
-  const type = typeof nav;
-  if (type === "function" && nav.isNavigator) {
-    return nav;
-  }
-
-  switch (type) {
-    case "string":
-      return module.exports.key(nav);
-    case "number":
-      return module.exports.nth(nav);
-    case "function":
-      return module.exports.pred(nav);
-  }
-};
-
-const compile = path => {
-  let defer;
-
-  const compiled = _.reduceRight(
-    (acc, nav) => resolveNavigator(nav)(acc),
-    op => v => defer(v),
-    Array.isArray(path) ? path : [path]
-  );
-
-  return (operation, lastFn, struct) => {
-    defer = lastFn;
-    return compiled(operation)(struct);
-  };
 };
 
 module.exports.compile = compile;

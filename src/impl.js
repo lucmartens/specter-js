@@ -179,3 +179,8 @@ module.exports.entries = obj => {
   }
   return acc;
 };
+
+module.exports.isObject = struct =>
+  typeof struct === "object" &&
+  struct !== null &&
+  struct.constructor === Object;

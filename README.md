@@ -2,6 +2,54 @@
 
 Javascript implementation of clojure's [specter](https://github.com/nathanmarz/specter) library
 
+## Operations
+
+- select
+- selectOne
+- transform
+- setval
+
+## Navigators
+
+### ALL
+
+The `ALL` navigator navigates to every element in an array or key/value pair in an object. `ALL` can transform to `NONE` to remove elements.
+
+```javascript
+s.select(s.ALL, [1, 2, 3]);
+[1, 2, 3];
+
+s.select(s.ALL, { a: 1, b: 2 });
+[["a", 1], ["b", 2]];
+
+s.transform(s.ALL, increment, [1, 2, 3]);
+[2, 3, 4];
+```
+
+## MAP_VALS
+
+The `MAP_VALS` navigator navigates to every value in an object. `MAP_VALS` can transform to `NONE` to remove entries.
+
+```javascript
+s.select(s.MAP_VALS, { a: 1, b: 2 });
+[1, 2];
+
+s.transform(s.MAP_VALS, increment, { a: 1, b: 2 });
+{ a: 2, b: 3 };
+```
+
+## MAP_KEYS
+
+The `MAP_KEYS` navigator navigates to every key in an object. `MAP_KEYS` can transform to `NONE` to remove entries.
+
+```javascript
+s.select(s.MAP_KEYS, { a: 1, b: 2 });
+["a", "b"];
+
+s.transform(s.MAP_KEYS, v => v + "x", { a: 1, b: 2 });
+{ ax: 1, bx: 2 };
+```
+
 # Examples
 
 Increment all values in object of objects:
