@@ -19,14 +19,26 @@ The `ALL` navigator navigates to every element in an array or key/value pair in 
 s.select(s.ALL, [1, 2, 3]);
 [1, 2, 3];
 
+s.select([s.ALL, s.ALL], [[1], [2], [3]]);
+[1, 2, 3];
+
 s.select(s.ALL, { a: 1, b: 2 });
 [["a", 1], ["b", 2]];
 
 s.transform(s.ALL, increment, [1, 2, 3]);
 [2, 3, 4];
+
+s.setval(s.ALL, s.NONE, [1, 2, 3]);
+[];
+
+s.setval(s.ALL, s.NONE, { a: 1 });
+{};
+
+s.setval(s.ALL, ["b", 2], { a: 1 });
+{ b: 2 };
 ```
 
-## MAP_VALS
+### MAP_VALS
 
 The `MAP_VALS` navigator navigates to every value in an object. `MAP_VALS` can transform to `NONE` to remove entries.
 
@@ -36,9 +48,12 @@ s.select(s.MAP_VALS, { a: 1, b: 2 });
 
 s.transform(s.MAP_VALS, increment, { a: 1, b: 2 });
 { a: 2, b: 3 };
+
+s.setval(s.MAP_VALS, s.NONE, { a: 1, b: 2 });
+{}
 ```
 
-## MAP_KEYS
+### MAP_KEYS
 
 The `MAP_KEYS` navigator navigates to every key in an object. `MAP_KEYS` can transform to `NONE` to remove entries.
 
@@ -48,9 +63,96 @@ s.select(s.MAP_KEYS, { a: 1, b: 2 });
 
 s.transform(s.MAP_KEYS, v => v + "x", { a: 1, b: 2 });
 { ax: 1, bx: 2 };
+
+s.setval(s.MAP_KEYS, s.NONE, { a: 1, b: 2 });
+{}
 ```
 
-# Examples
+### FIRST
+
+The `FIRST` navigator navigates to the first element in an array. Stops navigation if the array is empty. `FIRST` can transform to `NONE` to remove the first element.
+
+```javascript
+s.select(s.FIRST, [1, 2, 3]);
+[1];
+
+s.transform(s.FIRST, inc, [1, 2, 3]);
+[2, 2, 3];
+
+s.setval(s.FIRST, s.NONE, [1, 2, 3]);
+[2, 3];
+```
+
+### LAST
+
+The `LAST` navigator navigates to the last element in an array. Stops navigation if the array is empty. `LAST` can transform to `NONE` to remove the last element.
+
+```javascript
+s.select(s.LAST, [1, 2, 3]);
+[3];
+
+s.transform(s.LAST, inc, [1, 2, 3]);
+[1, 2, 4];
+
+s.setval(s.LAST, s.NONE, [1, 2, 3]);
+[1, 2];
+```
+
+### BEGINNING
+
+The `BEGINNING` navigator navigates to the empty array before the beginning of an array. `BEGINNING` can be used to add elements to the front of an array.
+
+```javascript
+s.select(s.BEGINNING, [1, 2]);
+[];
+
+s.setval(s.BEGINNING, ["a", "b"], [1, 2]);
+["a", "b", 1, 2];
+```
+
+### END
+
+The `END` navigator navigates to the empty array after the end of an array. `END` can be used to add elements to the back of an array.
+
+```javascript
+s.select(s.END, [1, 2]);
+[];
+
+s.setval(s.END, ["a", "b"], [1, 2]);
+[1, 2, "a", "b"];
+```
+
+### BEFORE_ELEM
+
+The `BEFORE_ELEM` navigator navigates to the void element before the beginning of an array. `BEFORE_ELEM` can be used to add an element to the front of an array.
+
+```javascript
+s.select(s.BEFORE_ELEM, [1, 2]);
+[s.NONE];
+
+s.setval(s.BEFORE_ELEM, "a", [1, 2]);
+["a", 1, 2];
+
+s.setval(s.BEFORE_ELEM, s.NONE, [1, 2]);
+[1, 2];
+```
+
+### AFTER_ELEM
+
+The `AFTER_ELEM` navigator navigates to the void element after the end of an array. `AFTER_ELEM` can be used to add an element to the back of an array.
+
+```javascript
+s.select(s.AFTER_ELEM, [1, 2]);
+[s.NONE];
+
+s.setval(s.AFTER_ELEM, "a", [1, 2]);
+[1, 2, "a"];
+
+s.setval(s.AFTER_ELEM, s.NONE, [1, 2]);
+[1, 2];
+```
+
+## Examples
 
 Increment all values in object of objects:
 

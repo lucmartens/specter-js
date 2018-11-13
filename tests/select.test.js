@@ -34,6 +34,7 @@ describe("select", () => {
   test("FIRST", () => {
     select(s.FIRST, undefined, []);
     select(s.FIRST, [], []);
+    select([s.FIRST, s.FIRST], [], []);
     select(s.FIRST, [1, 2], [1]);
     select(s.FIRST, [[1, 2]], [[1, 2]]);
     select([s.FIRST, s.FIRST], [[1, 2]], [1]);

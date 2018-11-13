@@ -71,12 +71,22 @@ module.exports.MAP_KEYS = navigator({
   transform: next => struct => _.mapKeys(next, struct)
 });
 
+/**
+ * Navigate to the first element in an array.
+ * Stops navigation if the array is empty.
+ * Can transform to `NONE` to remove the element.
+ */
 module.exports.FIRST = navigator({
   select: next => struct => (_.isEmpty(struct) ? [] : next(struct[0])),
   transform: next => struct =>
     _.isEmpty(struct) ? struct : _.updateArray(0, next, struct)
 });
 
+/**
+ * Navigate to the lasy element in an array.
+ * Stops navigation if the array is empty.
+ * Can transform to `NONE` to remove the element.
+ */
 module.exports.LAST = navigator({
   select: next => struct =>
     _.isEmpty(struct) ? [] : next(struct[struct.length - 1]),
@@ -84,6 +94,10 @@ module.exports.LAST = navigator({
     _.isEmpty(struct) ? struct : _.updateArray(struct.length - 1, next, struct)
 });
 
+/**
+ * Navigates to the empty array before the beginning of an array.
+ * Can be used to add elements to the front of an array.
+ */
 module.exports.BEGINNING = navigator({
   select: next => struct => [],
   transform: next => struct => {
@@ -94,6 +108,10 @@ module.exports.BEGINNING = navigator({
   }
 });
 
+/**
+ * Navigates to the empty array after the end of an array.
+ * Can be used to add elements to the back of an array.
+ */
 module.exports.END = navigator({
   select: next => struct => [],
   transform: next => struct => {
@@ -104,6 +122,10 @@ module.exports.END = navigator({
   }
 });
 
+/**
+ * Navigates to the void element before the beginning of an array.
+ * Can be used to add an element to the front of an array.
+ */
 module.exports.BEFORE_ELEM = navigator({
   select: next => struct => NONE,
   transform: next => struct => {
@@ -112,6 +134,10 @@ module.exports.BEFORE_ELEM = navigator({
   }
 });
 
+/**
+ * Navigates to the void element after the end of an array.
+ * Can be used to add an element to the back of an array.
+ */
 module.exports.AFTER_ELEM = navigator({
   select: next => struct => NONE,
   transform: next => struct => {

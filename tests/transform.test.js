@@ -3,6 +3,9 @@ const s = require("../src/core");
 const transform = (path, fn, struct, expected) =>
   expect(s.transform(path, fn, struct)).toEqual(expected);
 
+const setval = (path, val, struct, expected) =>
+  expect(s.setval(path, val, struct)).toEqual(expected);
+
 const inc = v => v + 1;
 const even = v => v % 2 == 0;
 const odd = v => v % 2 !== 0;
@@ -20,10 +23,12 @@ describe("transform", () => {
     transform(s.ALL, inc, [], []);
     transform(s.ALL, inc, {}, {});
     transform(s.ALL, inc, [1, 2], [2, 3]);
+    setval(s.ALL, ["b", 2], {a: 1}, {b: 2});
     transform(s.ALL, constant(s.NONE), [1, 2], []);
     transform(s.ALL, constant(s.NONE), { a: 1 }, {});
     transform(s.ALL, v => [v[0] + "x", inc(v[1])], { a: 1 }, { ax: 2 });
     transform([s.ALL, s.ALL], inc, [[1, 2], [3, 4]], [[2, 3], [4, 5]]);
+
   });
 
   test("MAP_VALS", () => {
@@ -41,6 +46,7 @@ describe("transform", () => {
   test("FIRST", () => {
     transform(s.FIRST, identity, [], []);
     transform(s.FIRST, inc, [1, 2], [2, 2]);
+    transform([s.FIRST, s.FIRST], identity, [], []);
     transform([s.FIRST, s.FIRST], inc, [[1], 2], [[2], 2]);
     transform(s.FIRST, constant(s.NONE), [[1], 2], [2]);
   });
@@ -48,6 +54,7 @@ describe("transform", () => {
   test("LAST", () => {
     transform(s.LAST, identity, [], []);
     transform(s.LAST, inc, [1, 2], [1, 3]);
+    transform([s.LAST, s.LAST], identity, [], []);
     transform([s.LAST, s.LAST], inc, [1, [2]], [1, [3]]);
     transform(s.LAST, constant(s.NONE), [[1], 2], [[1]]);
   });
