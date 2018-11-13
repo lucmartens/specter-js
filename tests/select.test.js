@@ -78,10 +78,9 @@ describe("select", () => {
   });
 
   test("pred", () => {
-    select(() => false, 1, []);
-    select(() => true, 1, [1]);
-    select([v => v === 1], 1, [1]);
-    select([v => v !== 1], 1, []);
+    select(even, 2, [2]);
+    select(even, 1, []);
+    select([s.ALL, even], [1, 2, 3, 4], [2, 4]);
   });
 
   test("parser", () => {

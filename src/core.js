@@ -146,6 +146,10 @@ module.exports.AFTER_ELEM = navigator({
   }
 });
 
+/**
+ * Navigates to the value of specified key in an object.
+ * Can transform to NONE to remove the entry.
+ */
 module.exports.key = key =>
   navigator({
     select: next => struct => next(struct[key]),
@@ -155,12 +159,20 @@ module.exports.key = key =>
     }
   });
 
+/**
+ * Navigate to the element of specified index in an array.
+ * Can transform to NONE to remove the element.
+ */
 module.exports.nth = index =>
   navigator({
     select: next => struct => next(struct[index]),
     transform: next => struct => _.updateArray(index, next, struct)
   });
 
+/**
+ * Evaluate predicate function with the navigation.
+ * Navigation stop when the predicate return false.
+ */
 module.exports.pred = pred =>
   navigator({
     select: next => struct => (pred(struct) ? next(struct) : []),
