@@ -30,6 +30,12 @@ s.transform(s.ALL, increment, [1, 2, 3]);
 
 s.setval(s.ALL, s.NONE, [1, 2, 3]);
 [];
+
+s.setval(s.ALL, s.NONE, { a: 1 });
+{};
+
+s.setval(s.ALL, ["b", 2], { a: 1 });
+{ b: 2 };
 ```
 
 ### MAP_VALS
