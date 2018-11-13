@@ -29,11 +29,13 @@ describe("transform", () => {
   test("MAP_VALS", () => {
     transform(s.MAP_VALS, inc, {}, {});
     transform(s.MAP_VALS, inc, { a: 1 }, { a: 2 });
+    transform(s.MAP_VALS, constant(s.NONE), { a: 1 }, {});
   });
 
   test("MAP_KEYS", () => {
     transform(s.MAP_KEYS, inc, {}, {});
     transform(s.MAP_KEYS, v => v + "b", { a: "a" }, { ab: "a" });
+    transform(s.MAP_KEYS, constant(s.NONE), { a: 1 }, {});
   });
 
   test("FIRST", () => {
