@@ -23,12 +23,11 @@ describe("transform", () => {
     transform(s.ALL, inc, [], []);
     transform(s.ALL, inc, {}, {});
     transform(s.ALL, inc, [1, 2], [2, 3]);
-    setval(s.ALL, ["b", 2], {a: 1}, {b: 2});
+    setval(s.ALL, ["b", 2], { a: 1 }, { b: 2 });
     transform(s.ALL, constant(s.NONE), [1, 2], []);
     transform(s.ALL, constant(s.NONE), { a: 1 }, {});
     transform(s.ALL, v => [v[0] + "x", inc(v[1])], { a: 1 }, { ax: 2 });
     transform([s.ALL, s.ALL], inc, [[1, 2], [3, 4]], [[2, 3], [4, 5]]);
-
   });
 
   test("MAP_VALS", () => {
@@ -93,8 +92,10 @@ describe("transform", () => {
   });
 
   test("pred", () => {
-    transform([even], inc, 1, 1);
-    transform([even], inc, 2, 3);
+    transform(even, inc, 1, 1);
+    transform(even, inc, 2, 3);
+    setval([s.ALL, even], s.NONE, [1, 2, 3, 4], [1, 3]);
+    transform([s.ALL, even], inc, [1, 2, 3, 4], [1, 3, 3, 5]);
   });
 
   test("parser", () => {
