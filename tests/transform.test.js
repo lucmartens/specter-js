@@ -41,6 +41,7 @@ describe("transform", () => {
   test("FIRST", () => {
     transform(s.FIRST, identity, [], []);
     transform(s.FIRST, inc, [1, 2], [2, 2]);
+    transform([s.FIRST, s.FIRST], identity, [], []);
     transform([s.FIRST, s.FIRST], inc, [[1], 2], [[2], 2]);
     transform(s.FIRST, constant(s.NONE), [[1], 2], [2]);
   });
@@ -48,6 +49,7 @@ describe("transform", () => {
   test("LAST", () => {
     transform(s.LAST, identity, [], []);
     transform(s.LAST, inc, [1, 2], [1, 3]);
+    transform([s.LAST, s.LAST], identity, [], []);
     transform([s.LAST, s.LAST], inc, [1, [2]], [1, [3]]);
     transform(s.LAST, constant(s.NONE), [[1], 2], [[1]]);
   });
