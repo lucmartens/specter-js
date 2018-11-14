@@ -218,10 +218,28 @@ s.select([s.ALL, isEven], [1, 2, 3, 4]);
 // [2, 4]
 
 s.setval([s.ALL, isEven], s.NONE, [1, 2, 3, 4]);
-// [1, 3];
+// [1, 3]
 
 s.transform([s.ALL, isEven], increment, [1, 2, 3, 4]);
-// [1, 3, 3, 5];
+// [1, 3, 3, 5]
+```
+
+### beforeIndex
+
+The `beforeIndex` navigator navigates to the void element before a specified index in an array. `beforeIndex` can be used to insert elements in an array at arbitrary positions.
+
+```javascript
+s.select(s.beforeIndex(1), [1, 2, 3]);
+// [s.NONE]
+
+s.setval(s.beforeIndex(1), "a", [1, 2, 3]);
+// [1, "a", 2, 3]
+
+s.setval(s.beforeIndex(1), s.NONE, [1, 2, 3]);
+// [1, 2, 3]
+
+s.setval(s.beforeIndex(5), "a", [1, 2, 3]);
+// [1, 2, 3, "a"]
 ```
 
 ## Examples
