@@ -83,6 +83,11 @@ describe("select", () => {
     select([s.ALL, even], [1, 2, 3, 4], [2, 4]);
   });
 
+  test("beforeIndex", () => {
+    select(s.beforeIndex(1), [1, 2], [s.NONE]);
+    select(s.beforeIndex(1), [], [s.NONE]);
+  });
+
   test("parser", () => {
     const parse = time => time.split(".");
     const unparse = splitTime => splitTime.join(".");

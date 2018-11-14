@@ -179,6 +179,19 @@ module.exports.pred = pred =>
     transform: next => struct => (pred(struct) ? next(struct) : struct)
   });
 
+/**
+ * Navigate to the void element before a specified index in an array.
+ * Can be used to insert elements in an array at arbitrary positions.
+ */
+module.exports.beforeIndex = index =>
+  navigator({
+    select: next => struct => next(NONE),
+    transform: next => struct => {
+      const result = next(NONE);
+      return result === NONE ? struct : _.insertArray(index, result, struct);
+    }
+  });
+
 module.exports.parser = (parse, unparse) =>
   navigator({
     select: next => struct => next(parse(struct)),

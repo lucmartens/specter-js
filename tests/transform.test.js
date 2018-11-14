@@ -98,6 +98,12 @@ describe("transform", () => {
     transform([s.ALL, even], inc, [1, 2, 3, 4], [1, 3, 3, 5]);
   });
 
+  test("beforeIndex", () => {
+    setval(s.beforeIndex(1), "a", [1, 2, 3], [1, "a", 2, 3]);
+    setval(s.beforeIndex(1), s.NONE, [1, 2, 3], [1, 2, 3]);
+    setval(s.beforeIndex(5), "a", [1, 2, 3], [1, 2, 3, "a"]);
+  });
+
   test("parser", () => {
     const parse = time => time.split(".");
     const unparse = splitTime => splitTime.join(".");
